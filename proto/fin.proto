@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+service Fin {
+    rpc GetBalanceSheet(Ticker) returns (BalanceSheet);
+}
+
+message Ticker {
+    string Symbol = 1;
+}
+
+message BalanceSheet {
+    google.protobuf.Timestamp ReportDate = 1;
+    string                    FillingType = 2;
+    google.protobuf.Timestamp FiscalDate = 3;
+    int32                     FiscalQuarter = 4;
+    int32                     FiscalYear = 5;
+    string                    Currency = 6;
+    float                     CurrentCash = 7;
+	float                     ShortTermInvestments = 8;
+	float                     Receivables = 9;
+	float                     Inventory = 10;
+	float                     OtherCurrentAssets = 11;
+	float                     CurrentAssets = 12;
+	float                     LongTermInvestments = 13;
+	float                     PropertyPlantEquipment = 14;
+	float                     Goodwill = 15;
+	float                     IntangibleAssets = 16;
+	float                     OtherAssets = 17;
+	float                     TotalAssets = 18;
+	float                     AccountsPayable = 19;
+	float                     CurrentLongTermDebt = 20;
+	float                     OtherCurrentLiabilities = 21;
+	float                     TotalCurrentLiabilities = 22;
+	float                     LongTermDebt = 23;
+	float                     OtherLiablities = 24;
+	float                     MinorityInterest = 25;
+	float                     TotalLiabilities = 26;
+	float                     CommonStock = 27;
+	float                     RetainedEarnings = 28;
+	float                     TreasuryStock = 29;
+	float                     CapitalSurplus = 30;
+	float                     ShareholderEquity = 31;
+	float                     NetTangibleAssets = 32;
+}
