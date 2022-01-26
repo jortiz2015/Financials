@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	client := iex.NewClient("Tsk_18fb2a95ff9241c7a7fbb2ff127abc75", iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
+	client := iex.NewClient(os.Getenv("IEX_KEY"), iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
 
 	bs, err := client.AnnualBalanceSheets(context.Background(), "aapl", 1000)
 	if err != nil {
