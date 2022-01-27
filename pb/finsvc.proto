@@ -14,7 +14,7 @@ message Ticker {
 
 message BalanceSheet {
     google.protobuf.Timestamp ReportDate = 1;
-    string                    FillingType = 2;
+    string                    FilingType = 2;
     google.protobuf.Timestamp FiscalDate = 3;
     int32                     FiscalQuarter = 4;
     int32                     FiscalYear = 5;
@@ -36,7 +36,7 @@ message BalanceSheet {
 	double                    OtherCurrentLiabilities = 21;
 	double                    TotalCurrentLiabilities = 22;
 	double                    LongTermDebt = 23;
-	double                    OtherLiablities = 24;
+	double                    OtherLiabilities = 24;
 	double                    MinorityInterest = 25;
 	double                    TotalLiabilities = 26;
 	double                    CommonStock = 27;
