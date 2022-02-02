@@ -6,9 +6,12 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	//"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	api "finsvc/api"
+
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 
@@ -20,10 +23,12 @@ import (
 
 type Dynamo struct {
 	log log.Logger
+	iex api.IEX
 }
 
 func NewDynamo(log *log.Logger) *Dynamo {
-	return &Dynamo{log: *log}
+	iex := api.NewIEX(log)
+	return &Dynamo{log: *log, iex: *iex}
 }
 
 func (d *Dynamo) setBalanceSheet(item map[string]types.AttributeValue) (*pb.BalanceSheet, error) {
@@ -77,19 +82,112 @@ func (d *Dynamo) GetBalanceSheet(ctx context.Context, ticker *pb.Ticker) (*pb.Ba
 	// Using the Config value, create the DynamoDB client
 	client := dynamodb.NewFromConfig(cfg)
 
-	getItemInput := &dynamodb.GetItemInput{
-		Key: map[string]types.AttributeValue{
-			"symbol":     &types.AttributeValueMemberS{Value: "AAPL"},
-			"fiscalDate": &types.AttributeValueMemberS{Value: "2021-09-11"},
+	/*
+		getItemInput := &dynamodb.GetItemInput{
+			Key: map[string]types.AttributeValue{
+				"symbol":     &types.AttributeValueMemberS{Value: ticker.Symbol},
+				"fiscalDate": &types.AttributeValueMemberS{Value: "2021-09-11"},
+			},
+			TableName: aws.String("BalanceSheet"),
+		}
+
+		resp, err := client.GetItem(context.Background(), getItemInput)
+
+		if err != nil {
+			err = d.InsertBalanceSheet(ctx, ticker)
+			return nil, err
+		}
+
+		bs, _ := d.setBalanceSheet(resp.Item)
+	*/
+	t := time.Now()
+	today := t.Format("2006-01-02")
+	var limit int32 = 1
+
+	keyCond := expression.KeyAnd(
+		expression.Key("symbol").Equal(expression.Value(ticker.Symbol)),
+		expression.Key("fiscalDate").LessThanEqual(expression.Value(today)),
+	)
+
+	expr, err := expression.NewBuilder().WithKeyCondition(keyCond).Build()
+	if err != nil {
+		d.log.Fatalf("unable to build expression, %v", err)
+	}
+	out, err := client.Query(ctx, &dynamodb.QueryInput{
+		TableName:                 aws.String("BalanceSheet"),
+		KeyConditionExpression:    expr.KeyCondition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		ScanIndexForward:          aws.Bool(false), // Descending
+		Limit:                     &limit,          // Limit to 1
+	})
+
+	if err != nil {
+		d.log.Fatalf("unable to query, %v", err)
+	}
+
+	d.log.Println("QUERYING BALANCE SHEET ", out.Count)
+	d.log.Println("QUERYING BALANCE SHEET ", out.Items)
+	d.log.Println("QUERYING BALANCE SHEET ", out.Items[0]["fiscalDate"].(*types.AttributeValueMemberS).Value)
+
+	bs := &pb.BalanceSheet{}
+	return bs, nil
+}
+
+func (d *Dynamo) InsertBalanceSheet(ctx context.Context, ticker *pb.Ticker) error {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		d.log.Fatalf("unable to load SDK config, %v", err)
+	}
+
+	// Using the Config value, create the DynamoDB client
+	client := dynamodb.NewFromConfig(cfg)
+
+	symbol := ticker.Symbol
+	bs, _ := d.iex.GetBalanceSheet(ctx, symbol)
+	d.log.Println(bs)
+	input := &dynamodb.PutItemInput{
+		Item: map[string]types.AttributeValue{
+			"symbol":                  &types.AttributeValueMemberS{Value: symbol},
+			"fiscalDate":              &types.AttributeValueMemberS{Value: bs.FiscalDate.String()},
+			"currency":                &types.AttributeValueMemberS{Value: bs.Currency},
+			"goodwill":                &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Goodwill, 'f', -1, 64)},
+			"commonStock":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CommonStock, 'f', -1, 64)},
+			"propertyPlantEquipment":  &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.PropertyPlantEquipment, 'f', -1, 64)},
+			"retainedEarnings":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.RetainedEarnings, 'f', -1, 64)},
+			"totalLiabilities":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalLiabilities, 'f', -1, 64)},
+			"totalAssets":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalAssets, 'f', -1, 64)},
+			"otherAssets":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherAssets, 'f', -1, 64)},
+			"currentCash":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentCash, 'f', -1, 64)},
+			"currentLongTermDebt":     &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentLongTermDebt, 'f', -1, 64)},
+			"longTermInvestments":     &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.LongTermInvestments, 'f', -1, 64)},
+			"fiscalYear":              &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(bs.FiscalYear), 10)},
+			"otherCurrentLiabilities": &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherCurrentLiabilities, 'f', -1, 64)},
+			"shareholderEquity":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.ShareholderEquity, 'f', -1, 64)},
+			"netTangibleAssets":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.NetTangibleAssets, 'f', -1, 64)},
+			"intangibleAssets":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.IntangibleAssets, 'f', -1, 64)},
+			"inventory":               &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Inventory, 'f', -1, 64)},
+			"accountsPayable":         &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.AccountsPayable, 'f', -1, 64)},
+			"capitalSurplus":          &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CapitalSurplus, 'f', -1, 64)},
+			"otherLiabilities":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherLiablities, 'f', -1, 64)},
+			"otherCurrentAssets":      &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherCurrentAssets, 'f', -1, 64)},
+			"fiscalQuarter":           &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(bs.FiscalQuarter), 10)},
+			"minorityInterest":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.MinorityInterest, 'f', -1, 64)},
+			"receivables":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Receivables, 'f', -1, 64)},
+			"shortTermInvestments":    &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.ShortTermInvestments, 'f', -1, 64)},
+			"longTermDebt":            &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.LongTermDebt, 'f', -1, 64)},
+			"totalCurrentLiabilities": &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalCurrentLiabilities, 'f', -1, 64)},
+			"currentAssets":           &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentAssets, 'f', -1, 64)},
+			"reportDate":              &types.AttributeValueMemberS{Value: bs.ReportDate.String()},
+			"filingType":              &types.AttributeValueMemberS{Value: bs.FilingType},
 		},
 		TableName: aws.String("BalanceSheet"),
 	}
 
-	resp, err := client.GetItem(context.Background(), getItemInput)
+	_, err = client.PutItem(ctx, input)
 	if err != nil {
-		d.log.Fatalf("unable to get item, %v", err)
+		d.log.Printf("unable to insert item, %v", err)
 	}
 
-	bs, _ := d.setBalanceSheet(resp.Item)
-	return bs, nil
+	return err
 }

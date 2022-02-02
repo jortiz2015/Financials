@@ -109,6 +109,9 @@ func main() {
 	lg := log.Default()
 	dyn := dynamo.NewDynamo(lg)
 	//dyn.GetBalanceSheet(context.Background(), &pb.Ticker{Symbol: "AAPL"})
+	log.Println("GETTING STUFF FROM IEX")
+	//symbol := pb.Ticker{Symbol: "tsla"}
+	//dyn.InsertBalanceSheet(context.Background(), &symbol)
 
 	log := log.Default()
 	svr := grpc.NewServer()
