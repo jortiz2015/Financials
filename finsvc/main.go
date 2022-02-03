@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
-	pb "finsvc/pb"
-	dynamo "finsvc/store"
+	pb "fin/pb"
+	dynamo "fin/store"
 	"log"
 	"net"
 	"os"

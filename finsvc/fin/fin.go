@@ -2,7 +2,7 @@ package fin
 
 import (
 	"context"
-	pb "finsvc/pb"
+	pb "fin/pb"
 	"log"
 	"time"
 

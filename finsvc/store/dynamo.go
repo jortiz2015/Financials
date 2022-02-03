@@ -10,14 +10,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	//"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"finsvc/api"
+	"fin/api"
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 
 	//"encoding/json"
 	"context"
-	pb "finsvc/pb"
+	pb "fin/pb"
 	"log"
 )
 

@@ -2,8 +2,8 @@ package svc
 
 import (
 	"context"
-	"finsvc/api"
-	"finsvc/model"
+	"fin/api"
+	"fin/model"
 	"log"
 )
 

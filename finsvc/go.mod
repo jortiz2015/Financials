@@ -1,4 +1,4 @@
-module finsvc
+module fin
 
 go 1.17
 

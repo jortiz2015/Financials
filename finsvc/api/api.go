@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"finsvc/model"
+	"fin/model"
 )
 
 // Core API port for service.
