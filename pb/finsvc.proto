@@ -5,44 +5,50 @@ import "google/protobuf/timestamp.proto";
 option go_package = "fin";
 
 service FinSvc {
-    rpc GetBalanceSheet(Ticker) returns (BalanceSheet);
+    //rpc GetAnnualBalanceSheet(Symbol) returns (BalanceSheet);
+    rpc GetAnnualBalanceSheets(GetRequest) returns (BalanceSheets);
 }
 
-message Ticker {
-    string Symbol = 1;
+message GetRequest {
+    string symbol = 1;
+    int32  limit = 2;
+}
+
+message BalanceSheets {
+    repeated BalanceSheet balanceSheets= 1;
 }
 
 message BalanceSheet {
-    google.protobuf.Timestamp ReportDate = 1;
-    string                    FilingType = 2;
-    google.protobuf.Timestamp FiscalDate = 3;
-    int32                     FiscalQuarter = 4;
-    int32                     FiscalYear = 5;
-    string                    Currency = 6;
-    double                    CurrentCash = 7;
-	double                    ShortTermInvestments = 8;
-	double                    Receivables = 9;
-	double                    Inventory = 10;
-	double                    OtherCurrentAssets = 11;
-	double                    CurrentAssets = 12;
-	double                    LongTermInvestments = 13;
-	double                    PropertyPlantEquipment = 14;
-	double                    Goodwill = 15;
-	double                    IntangibleAssets = 16;
-	double                    OtherAssets = 17;
-	double                    TotalAssets = 18;
-	double                    AccountsPayable = 19;
-	double                    CurrentLongTermDebt = 20;
-	double                    OtherCurrentLiabilities = 21;
-	double                    TotalCurrentLiabilities = 22;
-	double                    LongTermDebt = 23;
-	double                    OtherLiabilities = 24;
-	double                    MinorityInterest = 25;
-	double                    TotalLiabilities = 26;
-	double                    CommonStock = 27;
-	double                    RetainedEarnings = 28;
-	double                    TreasuryStock = 29;
-	double                    CapitalSurplus = 30;
-	double                    ShareholderEquity = 31;
-	double                    NetTangibleAssets = 32;
+    google.protobuf.Timestamp reportDate = 1;
+    string                    filingType = 2;
+    google.protobuf.Timestamp fiscalDate = 3;
+    int32                     fiscalQuarter = 4;
+    int32                     fiscalYear = 5;
+    string                    currency = 6;
+    double                    currentCash = 7;
+	double                    shortTermInvestments = 8;
+	double                    receivables = 9;
+	double                    inventory = 10;
+	double                    otherCurrentAssets = 11;
+	double                    currentAssets = 12;
+	double                    longTermInvestments = 13;
+	double                    propertyPlantEquipment = 14;
+	double                    goodwill = 15;
+	double                    intangibleAssets = 16;
+	double                    otherAssets = 17;
+	double                    totalAssets = 18;
+	double                    accountsPayable = 19;
+	double                    currentLongTermDebt = 20;
+	double                    otherCurrentLiabilities = 21;
+	double                    totalCurrentLiabilities = 22;
+	double                    longTermDebt = 23;
+	double                    otherLiabilities = 24;
+	double                    minorityInterest = 25;
+	double                    totalLiabilities = 26;
+	double                    commonStock = 27;
+	double                    retainedEarnings = 28;
+	double                    treasuryStock = 29;
+	double                    capitalSurplus = 30;
+	double                    shareholderEquity = 31;
+	double                    netTangibleAssets = 32;
 }

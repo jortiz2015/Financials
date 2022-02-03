@@ -15,12 +15,12 @@ type Svc struct {
 }
 
 // Creates a new service to use API.
-func NewSvc(l *log.Logger, store api.Store, ds api.DataSource) *Svc {
+func NewSvc(l *log.Logger, store api.Store, ds api.DataSource) api.API {
 	return &Svc{log: l, store: store, ds: ds}
 }
 
-func (svc *Svc) GetAnualBalanceSheet(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
-	bs, err := svc.store.GetAnnualBalanceSheet(ctx, symbol, limit)
+func (svc *Svc) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
+	bs, err := svc.store.GetAnnualBalanceSheets(ctx, symbol, limit)
 	if err != nil {
 		svc.log.Printf("Error getting balance sheets: %s", err)
 		return []model.BalanceSheet{}, err
@@ -33,7 +33,7 @@ func (svc *Svc) GetAnualBalanceSheet(ctx context.Context, symbol string, limit i
 
 	// When there is no record in the store,
 	// we need to try to fetch it from the data source.
-	bs, err = svc.ds.GetAnnualBalanceSheet(ctx, symbol, limit)
+	bs, err = svc.ds.GetAnnualBalanceSheets(ctx, symbol, limit)
 	if err != nil {
 		svc.log.Fatalf("Error getting balance sheets: %s", err)
 		return []model.BalanceSheet{}, err
@@ -45,7 +45,7 @@ func (svc *Svc) GetAnualBalanceSheet(ctx context.Context, symbol string, limit i
 		return []model.BalanceSheet{}, nil
 	}
 
-	svc.store.InsertAnnualBalanceSheet(ctx, symbol, &bs[0])
+	svc.store.InsertAnnualBalanceSheets(ctx, symbol, bs)
 	if err != nil {
 		svc.log.Fatalf("Error inserting balance sheet to store: %s", err)
 	}

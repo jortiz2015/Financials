@@ -78,7 +78,7 @@ func (d *Dynamo) XetBalanceSheet(item map[string]types.AttributeValue) (model.Ba
 
 }
 
-func (d *Dynamo) GetAnnualBalanceSheet(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
+func (d *Dynamo) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
 	_limit := int32(limit)
 	pkFilter := fmt.Sprintf("SYMBOL#%s", symbol)
 	skFilter := "STATEMENT#BALANCESHEET#FILING#10-K"
@@ -155,47 +155,9 @@ func (d *Dynamo) GetAnnualBalanceSheet(ctx context.Context, symbol string, limit
 }
 
 func (d *Dynamo) InsertAnnualBalanceSheet(ctx context.Context, symbol string, bs *model.BalanceSheet) error {
-	pk := fmt.Sprintf("SYMBOL#%s", symbol)
-	sk := fmt.Sprintf("STATEMENT#BALANCESHEET#FILING#%s#FISCALDATE#%s", bs.FilingType, bs.FiscalDate.String())
-	d.log.Printf("Inserting bs into dynamo. pk: %s\tsk: %s\n", pk, sk)
-
+	item := d.MashalListOfMaps(symbol, bs)
 	input := &dynamodb.PutItemInput{
-		Item: map[string]types.AttributeValue{
-			"pk":                      &types.AttributeValueMemberS{Value: pk},
-			"sk":                      &types.AttributeValueMemberS{Value: sk},
-			"reportDate":              &types.AttributeValueMemberS{Value: bs.ReportDate.String()},
-			"filingType":              &types.AttributeValueMemberS{Value: bs.FilingType},
-			"fiscalDate":              &types.AttributeValueMemberS{Value: bs.FiscalDate.String()},
-			"fiscalQuarter":           &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(bs.FiscalQuarter), 10)},
-			"fiscalYear":              &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(bs.FiscalYear), 10)},
-			"currency":                &types.AttributeValueMemberS{Value: bs.Currency},
-			"currentCash":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentCash, 'f', -1, 64)},
-			"shortTermInvestments":    &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.ShortTermInvestments, 'f', -1, 64)},
-			"receivables":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Receivables, 'f', -1, 64)},
-			"inventory":               &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Inventory, 'f', -1, 64)},
-			"otherCurrentAssets":      &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherCurrentAssets, 'f', -1, 64)},
-			"currentAssets":           &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentAssets, 'f', -1, 64)},
-			"longTermInvestments":     &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.LongTermInvestments, 'f', -1, 64)},
-			"propertyPlantEquipment":  &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.PropertyPlantEquipment, 'f', -1, 64)},
-			"goodwill":                &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Goodwill, 'f', -1, 64)},
-			"intangibleAssets":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.IntangibleAssets, 'f', -1, 64)},
-			"otherAssets":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherAssets, 'f', -1, 64)},
-			"totalAssets":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalAssets, 'f', -1, 64)},
-			"accountsPayable":         &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.AccountsPayable, 'f', -1, 64)},
-			"currentLongTermDebt":     &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentLongTermDebt, 'f', -1, 64)},
-			"otherCurrentLiabilities": &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherCurrentLiabilities, 'f', -1, 64)},
-			"totalCurrentLiabilities": &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalCurrentLiabilities, 'f', -1, 64)},
-			"longTermDebt":            &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.LongTermDebt, 'f', -1, 64)},
-			"otherLiabilities":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherLiabilities, 'f', -1, 64)},
-			"minorityInterest":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.MinorityInterest, 'f', -1, 64)},
-			"totalLiabilities":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalLiabilities, 'f', -1, 64)},
-			"commonStock":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CommonStock, 'f', -1, 64)},
-			"retainedEarnings":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.RetainedEarnings, 'f', -1, 64)},
-			"treasuryStock":           &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TreasuryStock, 'f', -1, 64)},
-			"capitalSurplus":          &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CapitalSurplus, 'f', -1, 64)},
-			"shareholderEquity":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.ShareholderEquity, 'f', -1, 64)},
-			"netTangibleAssets":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.NetTangibleAssets, 'f', -1, 64)},
-		},
+		Item:      item,
 		TableName: aws.String("Financials"),
 	}
 
@@ -205,4 +167,78 @@ func (d *Dynamo) InsertAnnualBalanceSheet(ctx context.Context, symbol string, bs
 	}
 
 	return err
+}
+
+func (d *Dynamo) InsertAnnualBalanceSheets(ctx context.Context, symbol string, bs []model.BalanceSheet) error {
+	input := &dynamodb.BatchWriteItemInput{
+		RequestItems: d.GetWriteRequestItems(symbol, bs),
+	}
+
+	_, err := d.client.BatchWriteItem(ctx, input)
+	if err != nil {
+		d.log.Fatalf("Unable to insert bulk Annual Balance Sheet for symbol: %s, %v", symbol, err)
+	}
+
+	return nil
+}
+
+// Function to create a map[string][]types.WriteRequest of Put Requests to insert array of model.BalanceSheet
+func (d *Dynamo) GetWriteRequestItems(symbol string, bs []model.BalanceSheet) map[string][]types.WriteRequest {
+	requestItems := map[string][]types.WriteRequest{}
+	requestItems["Financials"] = []types.WriteRequest{}
+
+	for i := 0; i < len(bs); i++ {
+		requestItems["Financials"] = append(requestItems["Financials"], types.WriteRequest{
+			PutRequest: &types.PutRequest{
+				Item: d.MashalListOfMaps(symbol, &bs[i]),
+			},
+		})
+	}
+
+	return requestItems
+}
+
+func (d *Dynamo) MashalListOfMaps(symbol string, bs *model.BalanceSheet) map[string]types.AttributeValue {
+	pk := fmt.Sprintf("SYMBOL#%s", symbol)
+	sk := fmt.Sprintf("STATEMENT#BALANCESHEET#FILING#%s#FISCALDATE#%s", bs.FilingType, bs.FiscalDate.String())
+	d.log.Printf("Inserting bs into dynamo. pk: %s\tsk: %s\n", pk, sk)
+
+	item := map[string]types.AttributeValue{
+		"pk":                      &types.AttributeValueMemberS{Value: pk},
+		"sk":                      &types.AttributeValueMemberS{Value: sk},
+		"reportDate":              &types.AttributeValueMemberS{Value: bs.ReportDate.String()},
+		"filingType":              &types.AttributeValueMemberS{Value: bs.FilingType},
+		"fiscalDate":              &types.AttributeValueMemberS{Value: bs.FiscalDate.String()},
+		"fiscalQuarter":           &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(bs.FiscalQuarter), 10)},
+		"fiscalYear":              &types.AttributeValueMemberN{Value: strconv.FormatInt(int64(bs.FiscalYear), 10)},
+		"currency":                &types.AttributeValueMemberS{Value: bs.Currency},
+		"currentCash":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentCash, 'f', -1, 64)},
+		"shortTermInvestments":    &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.ShortTermInvestments, 'f', -1, 64)},
+		"receivables":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Receivables, 'f', -1, 64)},
+		"inventory":               &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Inventory, 'f', -1, 64)},
+		"otherCurrentAssets":      &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherCurrentAssets, 'f', -1, 64)},
+		"currentAssets":           &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentAssets, 'f', -1, 64)},
+		"longTermInvestments":     &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.LongTermInvestments, 'f', -1, 64)},
+		"propertyPlantEquipment":  &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.PropertyPlantEquipment, 'f', -1, 64)},
+		"goodwill":                &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.Goodwill, 'f', -1, 64)},
+		"intangibleAssets":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.IntangibleAssets, 'f', -1, 64)},
+		"otherAssets":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherAssets, 'f', -1, 64)},
+		"totalAssets":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalAssets, 'f', -1, 64)},
+		"accountsPayable":         &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.AccountsPayable, 'f', -1, 64)},
+		"currentLongTermDebt":     &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CurrentLongTermDebt, 'f', -1, 64)},
+		"otherCurrentLiabilities": &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherCurrentLiabilities, 'f', -1, 64)},
+		"totalCurrentLiabilities": &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalCurrentLiabilities, 'f', -1, 64)},
+		"longTermDebt":            &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.LongTermDebt, 'f', -1, 64)},
+		"otherLiabilities":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.OtherLiabilities, 'f', -1, 64)},
+		"minorityInterest":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.MinorityInterest, 'f', -1, 64)},
+		"totalLiabilities":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TotalLiabilities, 'f', -1, 64)},
+		"commonStock":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CommonStock, 'f', -1, 64)},
+		"retainedEarnings":        &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.RetainedEarnings, 'f', -1, 64)},
+		"treasuryStock":           &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.TreasuryStock, 'f', -1, 64)},
+		"capitalSurplus":          &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.CapitalSurplus, 'f', -1, 64)},
+		"shareholderEquity":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.ShareholderEquity, 'f', -1, 64)},
+		"netTangibleAssets":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(bs.NetTangibleAssets, 'f', -1, 64)},
+	}
+
+	return item
 }

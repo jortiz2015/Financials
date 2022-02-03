@@ -22,7 +22,7 @@ func NewIEX(log *log.Logger) api.DataSource {
 	return &IEX{log: *log, client: client}
 }
 
-func (i *IEX) GetAnnualBalanceSheet(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
+func (i *IEX) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
 	response, err := i.client.AnnualBalanceSheets(context.Background(), symbol, limit)
 	if err != nil {
 		log.Fatalf("Error getting balance sheets: %s", err)
