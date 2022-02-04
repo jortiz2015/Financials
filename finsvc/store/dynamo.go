@@ -115,7 +115,7 @@ func (d *Dynamo) GetAnnualBalanceSheets(ctx context.Context, symbol string, limi
 		bs := model.BalanceSheet{}
 		bs.ReportDate, _ = time.Parse("2006-01-02", out.Items[i]["reportDate"].(*types.AttributeValueMemberS).Value)
 		bs.FilingType = out.Items[i]["filingType"].(*types.AttributeValueMemberS).Value
-		bs.FiscalDate, _ = time.Parse("2006-01-02", out.Items[i]["fiscalDate"].(*types.AttributeValueMemberS).Value)
+		bs.FiscalDate, _ = time.Parse("2006-01-02", (out.Items[i]["fiscalDate"].(*types.AttributeValueMemberS).Value))
 		fq, _ := strconv.ParseInt(out.Items[i]["fiscalQuarter"].(*types.AttributeValueMemberN).Value, 10, 32)
 		bs.FiscalQuarter = int(fq)
 		fy, _ := strconv.ParseInt(out.Items[i]["fiscalYear"].(*types.AttributeValueMemberN).Value, 10, 32)
