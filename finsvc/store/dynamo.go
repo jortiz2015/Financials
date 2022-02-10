@@ -36,48 +36,6 @@ func NewDynamo(log *log.Logger) (api.Store, error) {
 	return &Dynamo{log: *log, client: client}, err
 }
 
-func (d *Dynamo) XetBalanceSheet(item map[string]types.AttributeValue) (model.BalanceSheet, error) {
-	bs := model.BalanceSheet{}
-	bs.AccountsPayable, _ = strconv.ParseFloat(item["accountsPayable"].(*types.AttributeValueMemberN).Value, 64)
-	bs.CapitalSurplus, _ = strconv.ParseFloat(item["capitalSurplus"].(*types.AttributeValueMemberN).Value, 64)
-	bs.CommonStock, _ = strconv.ParseFloat(item["commonStock"].(*types.AttributeValueMemberN).Value, 64)
-	bs.Currency = item["currency"].(*types.AttributeValueMemberS).Value
-	bs.CurrentAssets, _ = strconv.ParseFloat(item["currentAssets"].(*types.AttributeValueMemberN).Value, 64)
-	bs.CurrentCash, _ = strconv.ParseFloat(item["currentCash"].(*types.AttributeValueMemberN).Value, 64)
-	bs.CurrentLongTermDebt, _ = strconv.ParseFloat(item["currentLongTermDebt"].(*types.AttributeValueMemberN).Value, 64)
-	bs.FilingType = item["filingType"].(*types.AttributeValueMemberS).Value
-	fdte, _ := time.Parse("2006-01-02", item["fiscalDate"].(*types.AttributeValueMemberS).Value)
-	bs.FiscalDate = fdte
-	fq, _ := strconv.ParseInt(item["fiscalQuarter"].(*types.AttributeValueMemberN).Value, 10, 32)
-	bs.FiscalQuarter = int(fq)
-	fy, _ := strconv.ParseInt(item["fiscalYear"].(*types.AttributeValueMemberN).Value, 10, 32)
-	bs.FiscalYear = int(fy)
-	bs.Goodwill, _ = strconv.ParseFloat(item["goodwill"].(*types.AttributeValueMemberN).Value, 64)
-	bs.IntangibleAssets, _ = strconv.ParseFloat(item["intangibleAssets"].(*types.AttributeValueMemberN).Value, 64)
-	bs.Inventory, _ = strconv.ParseFloat(item["inventory"].(*types.AttributeValueMemberN).Value, 64)
-	bs.LongTermDebt, _ = strconv.ParseFloat(item["longTermDebt"].(*types.AttributeValueMemberN).Value, 64)
-	bs.LongTermInvestments, _ = strconv.ParseFloat(item["longTermInvestments"].(*types.AttributeValueMemberN).Value, 64)
-	bs.MinorityInterest, _ = strconv.ParseFloat(item["minorityInterest"].(*types.AttributeValueMemberN).Value, 64)
-	bs.NetTangibleAssets, _ = strconv.ParseFloat(item["netTangibleAssets"].(*types.AttributeValueMemberN).Value, 64)
-	bs.OtherAssets, _ = strconv.ParseFloat(item["otherAssets"].(*types.AttributeValueMemberN).Value, 64)
-	bs.OtherCurrentAssets, _ = strconv.ParseFloat(item["otherCurrentAssets"].(*types.AttributeValueMemberN).Value, 64)
-	bs.OtherCurrentLiabilities, _ = strconv.ParseFloat(item["otherCurrentLiabilities"].(*types.AttributeValueMemberN).Value, 64)
-	bs.OtherLiabilities, _ = strconv.ParseFloat(item["otherLiabilities"].(*types.AttributeValueMemberN).Value, 64)
-	bs.PropertyPlantEquipment, _ = strconv.ParseFloat(item["propertyPlantEquipment"].(*types.AttributeValueMemberN).Value, 64)
-	bs.Receivables, _ = strconv.ParseFloat(item["receivables"].(*types.AttributeValueMemberN).Value, 64)
-	rdte, _ := time.Parse("2006-01-02", item["reportDate"].(*types.AttributeValueMemberS).Value)
-	bs.ReportDate = rdte
-	bs.RetainedEarnings, _ = strconv.ParseFloat(item["retainedEarnings"].(*types.AttributeValueMemberN).Value, 64)
-	bs.ShareholderEquity, _ = strconv.ParseFloat(item["shareholderEquity"].(*types.AttributeValueMemberN).Value, 64)
-	bs.ShortTermInvestments, _ = strconv.ParseFloat(item["shortTermInvestments"].(*types.AttributeValueMemberN).Value, 64)
-	bs.TotalAssets, _ = strconv.ParseFloat(item["totalAssets"].(*types.AttributeValueMemberN).Value, 64)
-	bs.TotalCurrentLiabilities, _ = strconv.ParseFloat(item["totalCurrentLiabilities"].(*types.AttributeValueMemberN).Value, 64)
-	bs.TotalLiabilities, _ = strconv.ParseFloat(item["totalLiabilities"].(*types.AttributeValueMemberN).Value, 64)
-
-	return bs, nil
-
-}
-
 func (d *Dynamo) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
 	_limit := int32(limit)
 	pkFilter := fmt.Sprintf("SYMBOL#%s", symbol)
@@ -373,6 +331,143 @@ func (d *Dynamo) MarshalListOfMapsIS(symbol string, is *model.IncomeStatement) m
 		"minorityInterest":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(is.MinorityInterest, 'f', -1, 64)},
 		"netIncome":              &types.AttributeValueMemberN{Value: strconv.FormatFloat(is.NetIncome, 'f', -1, 64)},
 		"netIncomeBasic":         &types.AttributeValueMemberN{Value: strconv.FormatFloat(is.NetIncomeBasic, 'f', -1, 64)},
+	}
+
+	return item
+}
+
+// CASH FLOW FUNCTIONS
+
+func (d *Dynamo) GetAnnualCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error) {
+	_limit := int32(limit)
+	pkFilter := fmt.Sprintf("SYMBOL#%s", symbol)
+	skFilter := "STATEMENT#CASHFLOW#FILING#10-K"
+
+	keyCond := expression.KeyAnd(
+		expression.Key("pk").Equal(expression.Value(pkFilter)),
+		expression.KeyBeginsWith(expression.Key("sk"), skFilter),
+	)
+
+	expr, err := expression.NewBuilder().WithKeyCondition(keyCond).Build()
+	if err != nil {
+		d.log.Fatalf("unable to build expression, %v", err)
+	}
+	out, err := d.client.Query(ctx, &dynamodb.QueryInput{
+		TableName:                 aws.String("Financials"),
+		KeyConditionExpression:    expr.KeyCondition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		ScanIndexForward:          aws.Bool(false), // Descending
+		Limit:                     &_limit,
+	})
+
+	if err != nil {
+		d.log.Fatalf("Unable to fetch Annual Cash Flows for symbol: %s, %v", symbol, err)
+		return []model.CashFlow{}, err
+	}
+
+	d.log.Println("QUERYING CASH FLOWS", out.Count)
+
+	cashFlows := []model.CashFlow{}
+	//attributevalue.UnmarshalListOfMaps(out.Items, &balanceSheets)
+
+	for i := 0; i < int(out.Count); i++ {
+		cf := model.CashFlow{}
+		cf.ReportDate, _ = time.Parse("2006-01-02", out.Items[i]["reportDate"].(*types.AttributeValueMemberS).Value)
+		cf.FiscalDate, _ = time.Parse("2006-01-02", (out.Items[i]["fiscalDate"].(*types.AttributeValueMemberS).Value))
+		cf.Currency = out.Items[i]["currency"].(*types.AttributeValueMemberS).Value
+		cf.NetIncome, _ = strconv.ParseFloat(out.Items[i]["netIncome"].(*types.AttributeValueMemberN).Value, 64)
+		cf.Depreciation, _ = strconv.ParseFloat(out.Items[i]["depreciation"].(*types.AttributeValueMemberN).Value, 64)
+		cf.ChangesInReceivables, _ = strconv.ParseFloat(out.Items[i]["changesInReceivables"].(*types.AttributeValueMemberN).Value, 64)
+		cf.ChangesInInventories, _ = strconv.ParseFloat(out.Items[i]["changesInInventories"].(*types.AttributeValueMemberN).Value, 64)
+		cf.CashChange, _ = strconv.ParseFloat(out.Items[i]["cashChange"].(*types.AttributeValueMemberN).Value, 64)
+		cf.CashFlow, _ = strconv.ParseFloat(out.Items[i]["cashFlow"].(*types.AttributeValueMemberN).Value, 64)
+		cf.CapitalExpenditures, _ = strconv.ParseFloat(out.Items[i]["capitalExpenditures"].(*types.AttributeValueMemberN).Value, 64)
+		cf.Investments, _ = strconv.ParseFloat(out.Items[i]["investments"].(*types.AttributeValueMemberN).Value, 64)
+		cf.InvestingActivityOther, _ = strconv.ParseFloat(out.Items[i]["investingActivityOther"].(*types.AttributeValueMemberN).Value, 64)
+		cf.TotalInvestingCashFlows, _ = strconv.ParseFloat(out.Items[i]["totalInvestingCashFlows"].(*types.AttributeValueMemberN).Value, 64)
+		cf.DividendsPaid, _ = strconv.ParseFloat(out.Items[i]["dividendsPaid"].(*types.AttributeValueMemberN).Value, 64)
+		cf.NetBorrowings, _ = strconv.ParseFloat(out.Items[i]["netBorrowings"].(*types.AttributeValueMemberN).Value, 64)
+		cf.OtherFinancingCashFlows, _ = strconv.ParseFloat(out.Items[i]["otherFinancingCashFlows"].(*types.AttributeValueMemberN).Value, 64)
+		cf.CashFlowFinancing, _ = strconv.ParseFloat(out.Items[i]["cashFlowFinancing"].(*types.AttributeValueMemberN).Value, 64)
+		cf.ExchangeRateEffect, _ = strconv.ParseFloat(out.Items[i]["exchangeRateEffect"].(*types.AttributeValueMemberN).Value, 64)
+
+		cashFlows = append(cashFlows, cf)
+	}
+
+	return cashFlows, nil
+}
+
+func (d *Dynamo) InsertAnnualCashFlow(ctx context.Context, symbol string, cf *model.CashFlow) error {
+	item := d.MarshalListOfMapsCF(symbol, cf)
+	input := &dynamodb.PutItemInput{
+		Item:      item,
+		TableName: aws.String("Financials"),
+	}
+
+	_, err := d.client.PutItem(ctx, input)
+	if err != nil {
+		d.log.Fatalf("Unable to insert Annual Cash Flow for symbol: %s, %v", symbol, err)
+	}
+
+	return err
+}
+
+func (d *Dynamo) InsertAnnualCashFlows(ctx context.Context, symbol string, cf []model.CashFlow) error {
+	input := &dynamodb.BatchWriteItemInput{
+		RequestItems: d.GetWriteRequestItemsCF(symbol, cf),
+	}
+
+	_, err := d.client.BatchWriteItem(ctx, input)
+	if err != nil {
+		d.log.Fatalf("Unable to insert bulk Annual Cash Flow for symbol: %s, %v", symbol, err)
+	}
+
+	return nil
+}
+
+// Function to create a map[string][]types.WriteRequest of Put Requests to insert array of model.CashFlow
+func (d *Dynamo) GetWriteRequestItemsCF(symbol string, cf []model.CashFlow) map[string][]types.WriteRequest {
+	requestItems := map[string][]types.WriteRequest{}
+	requestItems["Financials"] = []types.WriteRequest{}
+
+	for i := 0; i < len(cf); i++ {
+		requestItems["Financials"] = append(requestItems["Financials"], types.WriteRequest{
+			PutRequest: &types.PutRequest{
+				Item: d.MarshalListOfMapsCF(symbol, &cf[i]),
+			},
+		})
+	}
+
+	return requestItems
+}
+
+func (d *Dynamo) MarshalListOfMapsCF(symbol string, cf *model.CashFlow) map[string]types.AttributeValue {
+	pk := fmt.Sprintf("SYMBOL#%s", symbol)
+	sk := fmt.Sprintf("STATEMENT#CASHFLOW#FILING#10-K#FISCALDATE#%s", cf.FiscalDate.Format("2006-01-02"))
+	d.log.Printf("Inserting cf into dynamo. pk: %s\tsk: %s\n", pk, sk)
+
+	item := map[string]types.AttributeValue{
+		"pk":                      &types.AttributeValueMemberS{Value: pk},
+		"sk":                      &types.AttributeValueMemberS{Value: sk},
+		"reportDate":              &types.AttributeValueMemberS{Value: cf.ReportDate.Format("2006-01-02")},
+		"fiscalDate":              &types.AttributeValueMemberS{Value: cf.FiscalDate.Format("2006-01-02")},
+		"currency":                &types.AttributeValueMemberS{Value: cf.Currency},
+		"netIncome":               &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.NetIncome, 'f', -1, 64)},
+		"depreciation":            &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.Depreciation, 'f', -1, 64)},
+		"changesInReceivables":    &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.ChangesInReceivables, 'f', -1, 64)},
+		"changesInInventories":    &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.ChangesInInventories, 'f', -1, 64)},
+		"cashChange":              &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.CashChange, 'f', -1, 64)},
+		"cashFlow":                &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.CashFlow, 'f', -1, 64)},
+		"capitalExpenditures":     &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.CapitalExpenditures, 'f', -1, 64)},
+		"investments":             &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.Investments, 'f', -1, 64)},
+		"investingActivityOther":  &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.InvestingActivityOther, 'f', -1, 64)},
+		"totalInvestingCashFlows": &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.TotalInvestingCashFlows, 'f', -1, 64)},
+		"dividendsPaid":           &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.DividendsPaid, 'f', -1, 64)},
+		"netBorrowings":           &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.NetBorrowings, 'f', -1, 64)},
+		"otherFinancingCashFlows": &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.OtherFinancingCashFlows, 'f', -1, 64)},
+		"cashFlowFinancing":       &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.CashFlowFinancing, 'f', -1, 64)},
+		"exchangeRateEffect":      &types.AttributeValueMemberN{Value: strconv.FormatFloat(cf.ExchangeRateEffect, 'f', -1, 64)},
 	}
 
 	return item

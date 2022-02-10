@@ -8,6 +8,7 @@ service FinSvc {
     //rpc GetAnnualBalanceSheet(Symbol) returns (BalanceSheet);
     rpc GetAnnualBalanceSheets(GetRequest) returns (BalanceSheets);
     rpc GetAnnualIncomeStatements(GetRequest) returns (IncomeStatements);
+    rpc GetAnnualCashFlows(GetRequest) returns (CashFlows);
 }
 
 message GetRequest {
@@ -78,4 +79,29 @@ message IncomeStatement {
     double                    minorityInterest = 16;
     double                    netIncome = 17;
     double                    netIncomeBasic = 18;
+}
+
+message CashFlows {
+    repeated CashFlow cashFlows = 1;
+}
+
+message CashFlow {
+    google.protobuf.Timestamp reportDate = 1;
+    google.protobuf.Timestamp fiscalDate = 2;
+    string                    currency = 3;
+    double                    netIncome = 4;
+    double                    depreciation = 5;
+    double                    changesInReceivables = 6;
+    double                    changesInInventories = 7;
+    double                    cashChange = 8;
+    double                    cashFlow = 9;
+    double                    capitalExpenditures = 10;
+    double                    investments = 11;
+    double                    investingActivityOther = 12;
+    double                    totalInvestingCashFlows = 13;
+    double                    dividendsPaid = 14;
+    double                    netBorrowings = 15;
+    double                    otherFinancingCashFlows = 16;
+    double                    cashFlowFinancing = 17;
+    double                    exchangeRateEffect = 18;
 }

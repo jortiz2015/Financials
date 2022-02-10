@@ -108,6 +108,42 @@ func (i *IEX) GetAnnualIncomeStatements(ctx context.Context, symbol string, limi
 	return incomeStatements, nil
 }
 
+func (i *IEX) GetAnnualCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error) {
+	client := iex.NewClient(os.Getenv("IEX_KEY"), iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
+	response, err := client.AnnualCashFlows(context.Background(), symbol, limit)
+	if err != nil {
+		log.Fatalf("Error getting Cash Flows: %s", err)
+	}
+
+	cfs := response.Statements
+	cashFlows := []model.CashFlow{}
+
+	for _, i := range cfs {
+		cf := model.CashFlow{}
+		cf.ReportDate = time.Time(i.ReportDate)
+		cf.FiscalDate = time.Time(i.FiscalDate)
+		cf.Currency = i.Currency
+		cf.NetIncome = i.NetIncome
+		cf.Depreciation = i.Depreciation
+		cf.ChangesInReceivables = i.ChangesInReceivables
+		cf.ChangesInInventories = i.ChangesInInventories
+		cf.CashChange = i.CashChange
+		cf.CashFlow = i.CashFlow
+		cf.CapitalExpenditures = i.CapitalExpenditures
+		cf.Investments = i.Investments
+		cf.InvestingActivityOther = i.InvestingActivityOther
+		cf.TotalInvestingCashFlows = i.TotalInvestingCashFlows
+		cf.DividendsPaid = i.DividendsPaid
+		cf.NetBorrowings = i.NetBorrowings
+		cf.OtherFinancingCashFlows = i.OtherFinancingCashFlows
+		cf.CashFlowFinancing = i.CashFlowFinancing
+		cf.ExchangeRateEffect = i.ExchangeRateEffect
+		cashFlows = append(cashFlows, cf)
+	}
+
+	return cashFlows, nil
+}
+
 func (i *IEX) GetQuote(symbol string) (iex.Quote, error) {
 	q, err := i.client.Quote(context.Background(), "aapl")
 	if err != nil {

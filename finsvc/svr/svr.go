@@ -127,6 +127,51 @@ func (svc *Svr) GetIncomeStatement(is model.IncomeStatement) *pb.IncomeStatement
 	return &i
 }
 
+func (svr *Svr) GetAnnualCashFlows(ctx context.Context, request *pb.GetRequest) (*pb.CashFlows, error) {
+	cf := pb.CashFlows{}
+	symbol := request.GetSymbol()
+	limit := int(request.GetLimit())
+
+	mcf, err := svr.svc.GetAnnualCashFlows(ctx, symbol, limit)
+	if err != nil {
+		svr.log.Printf("Error fetching Cash Flows from service: %s", err)
+	}
+
+	if len(mcf) == 0 {
+		return &cf, nil
+	}
+
+	for _, mc := range mcf {
+		cf.CashFlows = append(cf.CashFlows, svr.GetCashFlow(mc))
+	}
+
+	return &cf, nil
+}
+
+func (svc *Svr) GetCashFlow(cf model.CashFlow) *pb.CashFlow {
+	c := pb.CashFlow{}
+	c.ReportDate = timestamppb.New(cf.ReportDate)
+	c.FiscalDate = timestamppb.New(cf.FiscalDate)
+	c.Currency = cf.Currency
+	c.NetIncome = cf.NetIncome
+	c.Depreciation = cf.Depreciation
+	c.ChangesInReceivables = cf.ChangesInReceivables
+	c.ChangesInInventories = cf.ChangesInInventories
+	c.CashChange = cf.CashChange
+	c.CashFlow = cf.CashFlow
+	c.CapitalExpenditures = cf.CapitalExpenditures
+	c.Investments = cf.Investments
+	c.InvestingActivityOther = cf.InvestingActivityOther
+	c.TotalInvestingCashFlows = cf.TotalInvestingCashFlows
+	c.DividendsPaid = cf.DividendsPaid
+	c.NetBorrowings = cf.NetBorrowings
+	c.OtherFinancingCashFlows = cf.OtherFinancingCashFlows
+	c.CashFlowFinancing = cf.CashFlowFinancing
+	c.ExchangeRateEffect = cf.ExchangeRateEffect
+
+	return &c
+}
+
 func (svr *Svr) StartServer() {
 	svr.log.Printf("Starting server...")
 

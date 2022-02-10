@@ -61,3 +61,25 @@ type IncomeStatement struct {
 	NetIncome              float64   `json:"netIncome" dynamodbav:"netIncome"`
 	NetIncomeBasic         float64   `json:"netIncomeBasic" dynamodbav:"netIncomeBasic"`
 }
+
+// CashFlow models one cash flow statement.
+type CashFlow struct {
+	ReportDate              time.Time `json:"reportDate" dynamodbav:"reportDate"`
+	FiscalDate              time.Time `json:"fiscalDate" dynamodbav:"fiscalDate"`
+	Currency                string    `json:"currency" dynamodbav:"currency"`
+	NetIncome               float64   `json:"netIncome" dynamodbav:"netIncome"`
+	Depreciation            float64   `json:"depreciation" dynamodbav:"depreciation"`
+	ChangesInReceivables    float64   `json:"changesInReceivables" dynamodbav:"changesInReceivables"`
+	ChangesInInventories    float64   `json:"changesInInventories" dynamodbav:"changesInInventories"`
+	CashChange              float64   `json:"cashChange" dynamodbav:"cashChange"`
+	CashFlow                float64   `json:"cashFlow" dynamodbav:"cashFlow"`
+	CapitalExpenditures     float64   `json:"capitalExpenditures" dynamodbav:"capitalExpenditures"`
+	Investments             float64   `json:"investments" dynamodbav:"investments"`
+	InvestingActivityOther  float64   `json:"investingActivityOther" dynamodbav:"investingActivityOther"`
+	TotalInvestingCashFlows float64   `json:"totalInvestingCashFlows" dynamodbav:"totalInvestingCashFlows"`
+	DividendsPaid           float64   `json:"dividendsPaid" dynamodbav:"dividendsPaid"`
+	NetBorrowings           float64   `json:"netBorrowings" dynamodbav:"netBorrowings"`
+	OtherFinancingCashFlows float64   `json:"otherFinancingCashFlows" dynamodbav:"otherFinancingCashFlows"`
+	CashFlowFinancing       float64   `json:"cashFlowFinancing" dynamodbav:"cashFlowFinancing"`
+	ExchangeRateEffect      float64   `json:"exchangeRateEffect" dynamodbav:"exchangeRateEffect"`
+}

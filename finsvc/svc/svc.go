@@ -86,3 +86,37 @@ func (svc *Svc) GetAnnualIncomeStatements(ctx context.Context, symbol string, li
 
 	return is, nil
 }
+
+func (svc *Svc) GetAnnualCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error) {
+	cf, err := svc.store.GetAnnualCashFlows(ctx, symbol, limit)
+	if err != nil {
+		svc.log.Printf("Error getting Cash Flows: %s", err)
+		return []model.CashFlow{}, err
+	}
+	svc.log.Printf("Got %d Cash Flows", len(cf))
+	// Return Cash Flows if store has it.
+	if len(cf) > 0 {
+		return cf, nil
+	}
+
+	// When there is no record in the store,
+	// we need to try to fetch it from the data source.
+	cf, err = svc.ds.GetAnnualCashFlows(ctx, symbol, limit)
+	if err != nil {
+		svc.log.Fatalf("Error getting Cash Flows: %s", err)
+		return []model.CashFlow{}, err
+	}
+
+	// If no Cash Flow is found, return an empty Cash Flow.
+	if len(cf) == 0 {
+		svc.log.Printf("No Cash Flows found for %s", symbol)
+		return []model.CashFlow{}, nil
+	}
+
+	svc.store.InsertAnnualCashFlows(ctx, symbol, cf)
+	if err != nil {
+		svc.log.Fatalf("Error inserting Cash Flows to store: %s", err)
+	}
+
+	return cf, nil
+}

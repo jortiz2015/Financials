@@ -301,3 +301,113 @@ export namespace IncomeStatement {
   }
 }
 
+export class CashFlows extends jspb.Message {
+  getCashflowsList(): Array<CashFlow>;
+  setCashflowsList(value: Array<CashFlow>): CashFlows;
+  clearCashflowsList(): CashFlows;
+  addCashflows(value?: CashFlow, index?: number): CashFlow;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): CashFlows.AsObject;
+  static toObject(includeInstance: boolean, msg: CashFlows): CashFlows.AsObject;
+  static serializeBinaryToWriter(message: CashFlows, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): CashFlows;
+  static deserializeBinaryFromReader(message: CashFlows, reader: jspb.BinaryReader): CashFlows;
+}
+
+export namespace CashFlows {
+  export type AsObject = {
+    cashflowsList: Array<CashFlow.AsObject>,
+  }
+}
+
+export class CashFlow extends jspb.Message {
+  getReportdate(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setReportdate(value?: google_protobuf_timestamp_pb.Timestamp): CashFlow;
+  hasReportdate(): boolean;
+  clearReportdate(): CashFlow;
+
+  getFiscaldate(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setFiscaldate(value?: google_protobuf_timestamp_pb.Timestamp): CashFlow;
+  hasFiscaldate(): boolean;
+  clearFiscaldate(): CashFlow;
+
+  getCurrency(): string;
+  setCurrency(value: string): CashFlow;
+
+  getNetincome(): number;
+  setNetincome(value: number): CashFlow;
+
+  getDepreciation(): number;
+  setDepreciation(value: number): CashFlow;
+
+  getChangesinreceivables(): number;
+  setChangesinreceivables(value: number): CashFlow;
+
+  getChangesininventories(): number;
+  setChangesininventories(value: number): CashFlow;
+
+  getCashchange(): number;
+  setCashchange(value: number): CashFlow;
+
+  getCashflow(): number;
+  setCashflow(value: number): CashFlow;
+
+  getCapitalexpenditures(): number;
+  setCapitalexpenditures(value: number): CashFlow;
+
+  getInvestments(): number;
+  setInvestments(value: number): CashFlow;
+
+  getInvestingactivityother(): number;
+  setInvestingactivityother(value: number): CashFlow;
+
+  getTotalinvestingcashflows(): number;
+  setTotalinvestingcashflows(value: number): CashFlow;
+
+  getDividendspaid(): number;
+  setDividendspaid(value: number): CashFlow;
+
+  getNetborrowings(): number;
+  setNetborrowings(value: number): CashFlow;
+
+  getOtherfinancingcashflows(): number;
+  setOtherfinancingcashflows(value: number): CashFlow;
+
+  getCashflowfinancing(): number;
+  setCashflowfinancing(value: number): CashFlow;
+
+  getExchangerateeffect(): number;
+  setExchangerateeffect(value: number): CashFlow;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): CashFlow.AsObject;
+  static toObject(includeInstance: boolean, msg: CashFlow): CashFlow.AsObject;
+  static serializeBinaryToWriter(message: CashFlow, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): CashFlow;
+  static deserializeBinaryFromReader(message: CashFlow, reader: jspb.BinaryReader): CashFlow;
+}
+
+export namespace CashFlow {
+  export type AsObject = {
+    reportdate?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    fiscaldate?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    currency: string,
+    netincome: number,
+    depreciation: number,
+    changesinreceivables: number,
+    changesininventories: number,
+    cashchange: number,
+    cashflow: number,
+    capitalexpenditures: number,
+    investments: number,
+    investingactivityother: number,
+    totalinvestingcashflows: number,
+    dividendspaid: number,
+    netborrowings: number,
+    otherfinancingcashflows: number,
+    cashflowfinancing: number,
+    exchangerateeffect: number,
+  }
+}
+
