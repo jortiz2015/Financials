@@ -13,6 +13,8 @@ type API interface {
 	GetQuarterlyIncomeStatements(ctx context.Context, symbol string, limit int) ([]model.IncomeStatement, error)
 	GetAnnualCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error)
 	GetQuarterlyCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error)
+	GetAnnualFinancials(ctx context.Context, symbol string, limit int) (model.Financials, error)
+	GetQuarterlyFinancials(ctx context.Context, symbol string, limit int) (model.Financials, error)
 }
 
 // Interface to fetch data from a data source like IEX.

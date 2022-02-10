@@ -222,3 +222,29 @@ func (svc *Svc) GetQuarterlyCashFlows(ctx context.Context, symbol string, limit 
 
 	return cf, nil
 }
+
+func (svc *Svc) GetAnnualFinancials(ctx context.Context, symbol string, limit int) (model.Financials, error) {
+	financials := model.Financials{}
+	balanceSheets, _ := svc.GetAnnualBalanceSheets(ctx, symbol, limit)
+	incomeStatements, _ := svc.GetAnnualIncomeStatements(ctx, symbol, limit)
+	cashFlows, _ := svc.GetAnnualCashFlows(ctx, symbol, limit)
+
+	financials.BalanceSheets = balanceSheets
+	financials.IncomeStatements = incomeStatements
+	financials.CashFlows = cashFlows
+
+	return financials, nil
+}
+
+func (svc *Svc) GetQuarterlyFinancials(ctx context.Context, symbol string, limit int) (model.Financials, error) {
+	financials := model.Financials{}
+	balanceSheets, _ := svc.GetQuarterlyBalanceSheets(ctx, symbol, limit)
+	incomeStatements, _ := svc.GetQuarterlyIncomeStatements(ctx, symbol, limit)
+	cashFlows, _ := svc.GetQuarterlyCashFlows(ctx, symbol, limit)
+
+	financials.BalanceSheets = balanceSheets
+	financials.IncomeStatements = incomeStatements
+	financials.CashFlows = cashFlows
+
+	return financials, nil
+}

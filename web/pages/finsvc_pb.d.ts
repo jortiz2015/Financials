@@ -411,3 +411,35 @@ export namespace CashFlow {
   }
 }
 
+export class Financials extends jspb.Message {
+  getBalancesheets(): BalanceSheets | undefined;
+  setBalancesheets(value?: BalanceSheets): Financials;
+  hasBalancesheets(): boolean;
+  clearBalancesheets(): Financials;
+
+  getIncomestatements(): IncomeStatements | undefined;
+  setIncomestatements(value?: IncomeStatements): Financials;
+  hasIncomestatements(): boolean;
+  clearIncomestatements(): Financials;
+
+  getCashflows(): CashFlows | undefined;
+  setCashflows(value?: CashFlows): Financials;
+  hasCashflows(): boolean;
+  clearCashflows(): Financials;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Financials.AsObject;
+  static toObject(includeInstance: boolean, msg: Financials): Financials.AsObject;
+  static serializeBinaryToWriter(message: Financials, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Financials;
+  static deserializeBinaryFromReader(message: Financials, reader: jspb.BinaryReader): Financials;
+}
+
+export namespace Financials {
+  export type AsObject = {
+    balancesheets?: BalanceSheets.AsObject,
+    incomestatements?: IncomeStatements.AsObject,
+    cashflows?: CashFlows.AsObject,
+  }
+}
+

@@ -11,6 +11,8 @@ service FinSvc {
     rpc GetQuarterlyIncomeStatements(GetRequest) returns (IncomeStatements);
     rpc GetAnnualCashFlows(GetRequest) returns (CashFlows);
     rpc GetQuarterlyCashFlows(GetRequest) returns (CashFlows);
+    rpc GetAnnualFinancials(GetRequest) returns (Financials);
+    rpc GetQuarterlyFinancials(GetRequest) returns (Financials);
 }
 
 message GetRequest {
@@ -106,4 +108,10 @@ message CashFlow {
     double                    otherFinancingCashFlows = 16;
     double                    cashFlowFinancing = 17;
     double                    exchangeRateEffect = 18;
+}
+
+message Financials {
+    BalanceSheets balanceSheets= 1;
+    IncomeStatements incomeStatements= 2;
+    CashFlows cashFlows= 3;
 }

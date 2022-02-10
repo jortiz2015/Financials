@@ -235,6 +235,32 @@ func (svc *Svr) GetCashFlow(cf model.CashFlow) *pb.CashFlow {
 	return &c
 }
 
+func (svr *Svr) GetAnnualFinancials(ctx context.Context, request *pb.GetRequest) (*pb.Financials, error) {
+	financials := pb.Financials{}
+	balanceSheets, _ := svr.GetAnnualBalanceSheets(ctx, request)
+	incomeStatements, _ := svr.GetAnnualIncomeStatements(ctx, request)
+	cashFlows, _ := svr.GetAnnualCashFlows(ctx, request)
+
+	financials.BalanceSheets = balanceSheets
+	financials.IncomeStatements = incomeStatements
+	financials.CashFlows = cashFlows
+
+	return &financials, nil
+}
+
+func (svr *Svr) GetQuarterlyFinancials(ctx context.Context, request *pb.GetRequest) (*pb.Financials, error) {
+	financials := pb.Financials{}
+	balanceSheets, _ := svr.GetQuarterlyBalanceSheets(ctx, request)
+	incomeStatements, _ := svr.GetQuarterlyIncomeStatements(ctx, request)
+	cashFlows, _ := svr.GetQuarterlyCashFlows(ctx, request)
+
+	financials.BalanceSheets = balanceSheets
+	financials.IncomeStatements = incomeStatements
+	financials.CashFlows = cashFlows
+
+	return &financials, nil
+}
+
 func (svr *Svr) StartServer() {
 	svr.log.Printf("Starting server...")
 

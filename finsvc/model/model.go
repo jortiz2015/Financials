@@ -83,3 +83,9 @@ type CashFlow struct {
 	CashFlowFinancing       float64   `json:"cashFlowFinancing" dynamodbav:"cashFlowFinancing"`
 	ExchangeRateEffect      float64   `json:"exchangeRateEffect" dynamodbav:"exchangeRateEffect"`
 }
+
+type Financials struct {
+	BalanceSheets    []BalanceSheet    `json:"balanceSheets" dynamodbav:"balanceSheets"`
+	CashFlows        []CashFlow        `json:"cashFlows" dynamodbav:"cashFlows"`
+	IncomeStatements []IncomeStatement `json:"incomeStatements" dynamodbav:"incomeStatements"`
+}

@@ -293,5 +293,91 @@ export class FinSvcClient {
     this.methodInfoGetQuarterlyCashFlows);
   }
 
+  methodInfoGetAnnualFinancials = new grpcWeb.MethodDescriptor(
+    '/FinSvc/GetAnnualFinancials',
+    grpcWeb.MethodType.UNARY,
+    finsvc_pb.GetRequest,
+    finsvc_pb.Financials,
+    (request: finsvc_pb.GetRequest) => {
+      return request.serializeBinary();
+    },
+    finsvc_pb.Financials.deserializeBinary
+  );
+
+  getAnnualFinancials(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null): Promise<finsvc_pb.Financials>;
+
+  getAnnualFinancials(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: finsvc_pb.Financials) => void): grpcWeb.ClientReadableStream<finsvc_pb.Financials>;
+
+  getAnnualFinancials(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: finsvc_pb.Financials) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/FinSvc/GetAnnualFinancials',
+        request,
+        metadata || {},
+        this.methodInfoGetAnnualFinancials,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/FinSvc/GetAnnualFinancials',
+    request,
+    metadata || {},
+    this.methodInfoGetAnnualFinancials);
+  }
+
+  methodInfoGetQuarterlyFinancials = new grpcWeb.MethodDescriptor(
+    '/FinSvc/GetQuarterlyFinancials',
+    grpcWeb.MethodType.UNARY,
+    finsvc_pb.GetRequest,
+    finsvc_pb.Financials,
+    (request: finsvc_pb.GetRequest) => {
+      return request.serializeBinary();
+    },
+    finsvc_pb.Financials.deserializeBinary
+  );
+
+  getQuarterlyFinancials(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null): Promise<finsvc_pb.Financials>;
+
+  getQuarterlyFinancials(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: finsvc_pb.Financials) => void): grpcWeb.ClientReadableStream<finsvc_pb.Financials>;
+
+  getQuarterlyFinancials(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: finsvc_pb.Financials) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/FinSvc/GetQuarterlyFinancials',
+        request,
+        metadata || {},
+        this.methodInfoGetQuarterlyFinancials,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/FinSvc/GetQuarterlyFinancials',
+    request,
+    metadata || {},
+    this.methodInfoGetQuarterlyFinancials);
+  }
+
 }
 
