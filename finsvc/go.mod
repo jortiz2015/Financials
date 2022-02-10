@@ -5,10 +5,9 @@ go 1.17
 require (
 	github.com/aws/aws-sdk-go-v2 v1.13.0
 	github.com/aws/aws-sdk-go-v2/config v1.13.0
-	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.6.0
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.3.7
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.13.0
-	github.com/goinvest/iexcloud/v2 v2.15.3
+	github.com/goinvest/iexcloud/v2 v2.15.4-0.20211210215149-6725a9b5b41f
 	github.com/golang/protobuf v1.5.2
 	golang.org/x/net v0.0.0-20220127074510-2fabfed7e28f
 	google.golang.org/grpc v1.44.0
@@ -17,6 +16,7 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.8.0 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.6.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.10.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.2.0 // indirect

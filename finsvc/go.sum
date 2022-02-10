@@ -60,6 +60,8 @@ github.com/go-test/deep v1.0.8 h1:TDsG77qcSprGbC6vTN8OuXp5g+J+b5Pcguhf7Zt61VM=
 github.com/go-test/deep v1.0.8/go.mod h1:5C2ZWiW0ErCdrYzpqxLbTX7MG14M9iiw8DgHncVwcsE=
 github.com/goinvest/iexcloud/v2 v2.15.3 h1:eFuT25r95ZFo1RrHDSPxFpdLk/IYr3DKVTR3G2MtfDg=
 github.com/goinvest/iexcloud/v2 v2.15.3/go.mod h1:nO+S3utFHsD8XcFQ3mLlorSmbwgkPaOWg+IDCE7/QCg=
+github.com/goinvest/iexcloud/v2 v2.15.4-0.20211210215149-6725a9b5b41f h1:YdMqdGAnkeBRssnYy52GG0pgBVKBxti0PN54/6nMPNg=
+github.com/goinvest/iexcloud/v2 v2.15.4-0.20211210215149-6725a9b5b41f/go.mod h1:50xijdYYFspNXV8Oi0o9Z0xhJkaNp6T7BFU8yelHi3A=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
@@ -93,6 +95,7 @@ github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9Y
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfCI6z80xFu9LTZmf1ZRjMHUOPmWr69U=
+github.com/karagog/testutil-go v0.0.0-20211208183738-8c37cec26dcb/go.mod h1:0ssa4Oum+vNHm7sMVKEU1zGE26K+47lvoZBeY8DJ2rY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
