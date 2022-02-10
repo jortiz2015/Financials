@@ -200,7 +200,7 @@ func (d *Dynamo) GetWriteRequestItemsBS(symbol string, bs []model.BalanceSheet) 
 
 func (d *Dynamo) MarshalListOfMapsBS(symbol string, bs *model.BalanceSheet) map[string]types.AttributeValue {
 	pk := fmt.Sprintf("SYMBOL#%s", symbol)
-	sk := fmt.Sprintf("STATEMENT#BALANCESHEET#FILING#%s#FISCALDATE#%s", bs.FilingType, bs.FiscalDate.String())
+	sk := fmt.Sprintf("STATEMENT#BALANCESHEET#FILING#%s#FISCALDATE#%s", bs.FilingType, bs.FiscalDate.Format("2006-01-02"))
 	d.log.Printf("Inserting bs into dynamo. pk: %s\tsk: %s\n", pk, sk)
 
 	item := map[string]types.AttributeValue{
@@ -349,7 +349,7 @@ func (d *Dynamo) GetWriteRequestItemsIS(symbol string, is []model.IncomeStatemen
 
 func (d *Dynamo) MarshalListOfMapsIS(symbol string, is *model.IncomeStatement) map[string]types.AttributeValue {
 	pk := fmt.Sprintf("SYMBOL#%s", symbol)
-	sk := fmt.Sprintf("STATEMENT#INCOME#FILING#10-K#FISCALDATE#%s", is.FiscalDate.String())
+	sk := fmt.Sprintf("STATEMENT#INCOME#FILING#10-K#FISCALDATE#%s", is.FiscalDate.Format("2006-01-02"))
 	d.log.Printf("Inserting bs into dynamo. pk: %s\tsk: %s\n", pk, sk)
 
 	item := map[string]types.AttributeValue{
