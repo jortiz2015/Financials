@@ -191,3 +191,113 @@ export namespace BalanceSheet {
   }
 }
 
+export class IncomeStatements extends jspb.Message {
+  getIncomestatementsList(): Array<IncomeStatement>;
+  setIncomestatementsList(value: Array<IncomeStatement>): IncomeStatements;
+  clearIncomestatementsList(): IncomeStatements;
+  addIncomestatements(value?: IncomeStatement, index?: number): IncomeStatement;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): IncomeStatements.AsObject;
+  static toObject(includeInstance: boolean, msg: IncomeStatements): IncomeStatements.AsObject;
+  static serializeBinaryToWriter(message: IncomeStatements, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): IncomeStatements;
+  static deserializeBinaryFromReader(message: IncomeStatements, reader: jspb.BinaryReader): IncomeStatements;
+}
+
+export namespace IncomeStatements {
+  export type AsObject = {
+    incomestatementsList: Array<IncomeStatement.AsObject>,
+  }
+}
+
+export class IncomeStatement extends jspb.Message {
+  getReportdate(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setReportdate(value?: google_protobuf_timestamp_pb.Timestamp): IncomeStatement;
+  hasReportdate(): boolean;
+  clearReportdate(): IncomeStatement;
+
+  getFiscaldate(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setFiscaldate(value?: google_protobuf_timestamp_pb.Timestamp): IncomeStatement;
+  hasFiscaldate(): boolean;
+  clearFiscaldate(): IncomeStatement;
+
+  getCurrency(): string;
+  setCurrency(value: string): IncomeStatement;
+
+  getTotalrevenue(): number;
+  setTotalrevenue(value: number): IncomeStatement;
+
+  getCostofrevenue(): number;
+  setCostofrevenue(value: number): IncomeStatement;
+
+  getGrossprofit(): number;
+  setGrossprofit(value: number): IncomeStatement;
+
+  getResearchanddevelopment(): number;
+  setResearchanddevelopment(value: number): IncomeStatement;
+
+  getSellinggeneralandadmin(): number;
+  setSellinggeneralandadmin(value: number): IncomeStatement;
+
+  getOperatingexpense(): number;
+  setOperatingexpense(value: number): IncomeStatement;
+
+  getOperatingincome(): number;
+  setOperatingincome(value: number): IncomeStatement;
+
+  getOtherincomeexpensenet(): number;
+  setOtherincomeexpensenet(value: number): IncomeStatement;
+
+  getEbit(): number;
+  setEbit(value: number): IncomeStatement;
+
+  getInterestincome(): number;
+  setInterestincome(value: number): IncomeStatement;
+
+  getPretaxincome(): number;
+  setPretaxincome(value: number): IncomeStatement;
+
+  getIncometax(): number;
+  setIncometax(value: number): IncomeStatement;
+
+  getMinorityinterest(): number;
+  setMinorityinterest(value: number): IncomeStatement;
+
+  getNetincome(): number;
+  setNetincome(value: number): IncomeStatement;
+
+  getNetincomebasic(): number;
+  setNetincomebasic(value: number): IncomeStatement;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): IncomeStatement.AsObject;
+  static toObject(includeInstance: boolean, msg: IncomeStatement): IncomeStatement.AsObject;
+  static serializeBinaryToWriter(message: IncomeStatement, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): IncomeStatement;
+  static deserializeBinaryFromReader(message: IncomeStatement, reader: jspb.BinaryReader): IncomeStatement;
+}
+
+export namespace IncomeStatement {
+  export type AsObject = {
+    reportdate?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    fiscaldate?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    currency: string,
+    totalrevenue: number,
+    costofrevenue: number,
+    grossprofit: number,
+    researchanddevelopment: number,
+    sellinggeneralandadmin: number,
+    operatingexpense: number,
+    operatingincome: number,
+    otherincomeexpensenet: number,
+    ebit: number,
+    interestincome: number,
+    pretaxincome: number,
+    incometax: number,
+    minorityinterest: number,
+    netincome: number,
+    netincomebasic: number,
+  }
+}
+

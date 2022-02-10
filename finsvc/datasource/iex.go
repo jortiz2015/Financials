@@ -64,11 +64,48 @@ func (i *IEX) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit i
 		bs.CapitalSurplus = b.CapitalSurplus
 		bs.ShareholderEquity = b.ShareholderEquity
 		bs.NetTangibleAssets = b.NetTangibleAssets
-
 		balanceSheets = append(balanceSheets, bs)
 	}
 
 	return balanceSheets, nil
+}
+
+func (i *IEX) GetAnnualIncomeStatements(ctx context.Context, symbol string, limit int) ([]model.IncomeStatement, error) {
+	client := iex.NewClient(os.Getenv("IEX_KEY"), iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
+	response, err := client.AnnualIncomeStatements(context.Background(), symbol, limit)
+	if err != nil {
+		log.Fatalf("Error getting Income Statements: %s", err)
+	}
+
+	i.log.Printf("RESPONSE: %+v\tERROR: %+v", response, err)
+
+	iss := response.Statements
+	incomeStatements := []model.IncomeStatement{}
+
+	for _, i := range iss {
+		is := model.IncomeStatement{}
+		is.ReportDate = time.Time(i.ReportDate)
+		is.FiscalDate = time.Time(i.FiscalDate)
+		is.Currency = i.Currency
+		is.TotalRevenue = i.TotalRevenue
+		is.CostOfRevenue = i.CostOfRevenue
+		is.GrossProfit = i.GrossProfit
+		is.ResearchAndDevelopment = i.ResearchAndDevelopment
+		is.SellingGeneralAndAdmin = i.SellingGeneralAndAdmin
+		is.OperatingExpense = i.OperatingExpense
+		is.OperatingIncome = i.OperatingIncome
+		is.OtherIncomeExpenseNet = i.OtherIncomeExpenseNet
+		is.EBIT = i.EBIT
+		is.InterestIncome = i.InterestIncome
+		is.PretaxIncome = i.PretaxIncome
+		is.IncomeTax = i.IncomeTax
+		is.MinorityInterest = i.MinorityInterest
+		is.NetIncome = i.NetIncome
+		is.NetIncomeBasic = i.NetIncomeBasic
+		incomeStatements = append(incomeStatements, is)
+	}
+
+	return incomeStatements, nil
 }
 
 func (i *IEX) GetQuote(symbol string) (iex.Quote, error) {

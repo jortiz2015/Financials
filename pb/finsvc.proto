@@ -7,6 +7,7 @@ option go_package = "fin";
 service FinSvc {
     //rpc GetAnnualBalanceSheet(Symbol) returns (BalanceSheet);
     rpc GetAnnualBalanceSheets(GetRequest) returns (BalanceSheets);
+    rpc GetAnnualIncomeStatements(GetRequest) returns (IncomeStatements);
 }
 
 message GetRequest {
@@ -51,4 +52,30 @@ message BalanceSheet {
 	double                    capitalSurplus = 30;
 	double                    shareholderEquity = 31;
 	double                    netTangibleAssets = 32;
+}
+
+
+message IncomeStatements {
+    repeated IncomeStatement incomeStatements = 1;
+}
+
+message IncomeStatement {
+    google.protobuf.Timestamp reportDate = 1;
+    google.protobuf.Timestamp fiscalDate = 2;
+    string                    currency = 3;
+    double                    totalRevenue = 4;
+    double                    costOfRevenue = 5;
+    double                    grossProfit = 6;
+    double                    researchAndDevelopment = 7;
+    double                    sellingGeneralAndAdmin = 8;
+    double                    operatingExpense = 9;
+    double                    operatingIncome = 10;
+    double                    otherIncomeExpenseNet = 11;
+    double                    ebit = 12;
+    double                    interestIncome = 13;
+    double                    pretaxIncome = 14;
+    double                    incomeTax = 15;
+    double                    minorityInterest = 16;
+    double                    netIncome = 17;
+    double                    netIncomeBasic = 18;
 }

@@ -78,5 +78,48 @@ export class FinSvcClient {
     this.methodInfoGetAnnualBalanceSheets);
   }
 
+  methodInfoGetAnnualIncomeStatements = new grpcWeb.MethodDescriptor(
+    '/FinSvc/GetAnnualIncomeStatements',
+    grpcWeb.MethodType.UNARY,
+    finsvc_pb.GetRequest,
+    finsvc_pb.IncomeStatements,
+    (request: finsvc_pb.GetRequest) => {
+      return request.serializeBinary();
+    },
+    finsvc_pb.IncomeStatements.deserializeBinary
+  );
+
+  getAnnualIncomeStatements(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null): Promise<finsvc_pb.IncomeStatements>;
+
+  getAnnualIncomeStatements(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: finsvc_pb.IncomeStatements) => void): grpcWeb.ClientReadableStream<finsvc_pb.IncomeStatements>;
+
+  getAnnualIncomeStatements(
+    request: finsvc_pb.GetRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: finsvc_pb.IncomeStatements) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/FinSvc/GetAnnualIncomeStatements',
+        request,
+        metadata || {},
+        this.methodInfoGetAnnualIncomeStatements,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/FinSvc/GetAnnualIncomeStatements',
+    request,
+    metadata || {},
+    this.methodInfoGetAnnualIncomeStatements);
+  }
+
 }
 

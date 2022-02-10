@@ -82,6 +82,51 @@ func (svc *Svr) GetBalanceSheet(bs model.BalanceSheet) *pb.BalanceSheet {
 	return &b
 }
 
+func (svr *Svr) GetAnnualIncomeStatements(ctx context.Context, request *pb.GetRequest) (*pb.IncomeStatements, error) {
+	is := pb.IncomeStatements{}
+	symbol := request.GetSymbol()
+	limit := int(request.GetLimit())
+
+	mis, err := svr.svc.GetAnnualIncomeStatements(ctx, symbol, limit)
+	if err != nil {
+		svr.log.Printf("Error fetching Income Statements from service: %s", err)
+	}
+
+	if len(mis) == 0 {
+		return &is, nil
+	}
+
+	for _, mi := range mis {
+		is.IncomeStatements = append(is.IncomeStatements, svr.GetIncomeStatement(mi))
+	}
+
+	return &is, nil
+}
+
+func (svc *Svr) GetIncomeStatement(is model.IncomeStatement) *pb.IncomeStatement {
+	i := pb.IncomeStatement{}
+	i.ReportDate = timestamppb.New(is.ReportDate)
+	i.FiscalDate = timestamppb.New(is.FiscalDate)
+	i.Currency = is.Currency
+	i.TotalRevenue = is.TotalRevenue
+	i.CostOfRevenue = is.CostOfRevenue
+	i.GrossProfit = is.GrossProfit
+	i.ResearchAndDevelopment = is.ResearchAndDevelopment
+	i.SellingGeneralAndAdmin = is.SellingGeneralAndAdmin
+	i.OperatingExpense = is.OperatingExpense
+	i.OperatingIncome = is.OperatingIncome
+	i.OtherIncomeExpenseNet = is.OtherIncomeExpenseNet
+	i.Ebit = is.EBIT
+	i.InterestIncome = is.InterestIncome
+	i.PretaxIncome = is.PretaxIncome
+	i.IncomeTax = is.IncomeTax
+	i.MinorityInterest = is.MinorityInterest
+	i.NetIncome = is.NetIncome
+	i.NetIncomeBasic = is.NetIncomeBasic
+
+	return &i
+}
+
 func (svr *Svr) StartServer() {
 	svr.log.Printf("Starting server...")
 

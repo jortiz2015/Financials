@@ -52,3 +52,37 @@ func (svc *Svc) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit
 
 	return bs, nil
 }
+
+func (svc *Svc) GetAnnualIncomeStatements(ctx context.Context, symbol string, limit int) ([]model.IncomeStatement, error) {
+	is, err := svc.store.GetAnnualIncomeStatements(ctx, symbol, limit)
+	if err != nil {
+		svc.log.Printf("Error getting Income Statements: %s", err)
+		return []model.IncomeStatement{}, err
+	}
+	svc.log.Printf("Got %d Income Statements", len(is))
+	// Return Income Statements if store has it.
+	if len(is) > 0 {
+		return is, nil
+	}
+
+	// When there is no record in the store,
+	// we need to try to fetch it from the data source.
+	is, err = svc.ds.GetAnnualIncomeStatements(ctx, symbol, limit)
+	if err != nil {
+		svc.log.Fatalf("Error getting Income Statements: %s", err)
+		return []model.IncomeStatement{}, err
+	}
+
+	// If no Income Statement is found, return an empty Income Statement.
+	if len(is) == 0 {
+		svc.log.Printf("No Income Statement found for %s", symbol)
+		return []model.IncomeStatement{}, nil
+	}
+
+	svc.store.InsertAnnualIncomeStatements(ctx, symbol, is)
+	if err != nil {
+		svc.log.Fatalf("Error inserting Income Statements to store: %s", err)
+	}
+
+	return is, nil
+}

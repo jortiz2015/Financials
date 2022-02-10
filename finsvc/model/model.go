@@ -39,3 +39,25 @@ type BalanceSheet struct {
 	ShareholderEquity       float64   `json:"shareholderEquity" dynamodbav:"shareholderEquity"`
 	NetTangibleAssets       float64   `json:"netTangibleAssets" dynamodbav:"netTangibleAssets"`
 }
+
+// IncomeStatement models one income statement.
+type IncomeStatement struct {
+	ReportDate             time.Time `json:"reportDate" dynamodbav:"reportDate"`
+	FiscalDate             time.Time `json:"fiscalDate" dynamodbav:"fiscalDate"`
+	Currency               string    `json:"currency" dynamodbav:"currency"`
+	TotalRevenue           float64   `json:"totalRevenue" dynamodbav:"totalRevenue"`
+	CostOfRevenue          float64   `json:"costOfRevenue" dynamodbav:"costOfRevenue"`
+	GrossProfit            float64   `json:"grossProfit" dynamodbav:"grossProfit"`
+	ResearchAndDevelopment float64   `json:"researchAndDevelopment" dynamodbav:"researchAndDevelopment"`
+	SellingGeneralAndAdmin float64   `json:"sellingGeneralAndAdmin" dynamodbav:"sellingGeneralAndAdmin"`
+	OperatingExpense       float64   `json:"operatingExpense" dynamodbav:"operatingExpense"`
+	OperatingIncome        float64   `json:"operatingIncome" dynamodbav:"operatingIncome"`
+	OtherIncomeExpenseNet  float64   `json:"otherIncomeExpenseNet" dynamodbav:"otherIncomeExpenseNet"`
+	EBIT                   float64   `json:"ebit" dynamodbav:"ebit"`
+	InterestIncome         float64   `json:"interestIncome" dynamodbav:"interestIncome"`
+	PretaxIncome           float64   `json:"pretaxIncome" dynamodbav:"pretaxIncome"`
+	IncomeTax              float64   `json:"incomeTax" dynamodbav:"incomeTax"`
+	MinorityInterest       float64   `json:"minorityInterest" dynamodbav:"minorityInterest"`
+	NetIncome              float64   `json:"netIncome" dynamodbav:"netIncome"`
+	NetIncomeBasic         float64   `json:"netIncomeBasic" dynamodbav:"netIncomeBasic"`
+}
