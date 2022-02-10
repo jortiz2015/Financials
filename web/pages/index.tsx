@@ -11,7 +11,7 @@ import FinTable from '../components/FinTable';
 
 const Home: NextPage = () => {
   const [balanceSheets, setBalanceSheets] = React.useState<BalanceSheet[] | null>(null);
-  const [symbol, setSymbol] = React.useState<string>("FB");
+  const [symbol, setSymbol] = React.useState<string>("TSLA");
 
   const symbolHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key != "Enter")
@@ -43,18 +43,6 @@ const Home: NextPage = () => {
       );
   }, [symbol]);
 
-  const currency = balanceSheets?.map(bs =>
-    <div key={bs.getFiscalyear()}>{bs.getFiscalyear() }</div>
-  );
-
-/*
-        <div>
-          {balanceSheets?.map((bs: BalanceSheet) =>  
-            <div key={bs.getFiscalyear()}>{bs.getFiscaldate()}</div>
-          )}
-        </div>
-*/
-
   return (
     <div className={styles.container}>
       <Head>
@@ -70,7 +58,7 @@ const Home: NextPage = () => {
 
         <div className={styles.description}>
           Get financial data for a stock symbol.
-          <code className={styles.code}>Ex: "TSLA"</code>
+          <code className={styles.code}>Ex: {symbol}</code>
           <div>
             <input className={styles.input} onKeyDown={symbolHandler} type="text" placeholder="Enter a stock symbol" />
           </div>
@@ -78,7 +66,12 @@ const Home: NextPage = () => {
 
 
         <div className={styles.card}>
+          <h2 style={{textAlign:"center"}}>Balance Sheet</h2>
+          {
+            balanceSheets ?
           <FinTable f={balanceSheets} ></FinTable>
+          : <div>Loading...</div>
+          }
         </div>
 
       </main>
