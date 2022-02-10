@@ -44,6 +44,27 @@ func (svr *Svr) GetAnnualBalanceSheets(ctx context.Context, request *pb.GetReque
 	return &bs, nil
 }
 
+func (svr *Svr) GetQuarterlyBalanceSheets(ctx context.Context, request *pb.GetRequest) (*pb.BalanceSheets, error) {
+	bs := pb.BalanceSheets{}
+	symbol := request.GetSymbol()
+	limit := int(request.GetLimit())
+
+	mbs, err := svr.svc.GetQuarterlyBalanceSheets(ctx, symbol, limit)
+	if err != nil {
+		svr.log.Printf("Error fetching balance sheets from service: %s", err)
+	}
+
+	if len(mbs) == 0 {
+		return &bs, nil
+	}
+
+	for _, mb := range mbs {
+		bs.BalanceSheets = append(bs.BalanceSheets, svr.GetBalanceSheet(mb))
+	}
+
+	return &bs, nil
+}
+
 func (svc *Svr) GetBalanceSheet(bs model.BalanceSheet) *pb.BalanceSheet {
 	b := pb.BalanceSheet{}
 	b.ReportDate = timestamppb.New(bs.ReportDate)
@@ -103,6 +124,27 @@ func (svr *Svr) GetAnnualIncomeStatements(ctx context.Context, request *pb.GetRe
 	return &is, nil
 }
 
+func (svr *Svr) GetQuarterlyIncomeStatements(ctx context.Context, request *pb.GetRequest) (*pb.IncomeStatements, error) {
+	is := pb.IncomeStatements{}
+	symbol := request.GetSymbol()
+	limit := int(request.GetLimit())
+
+	mis, err := svr.svc.GetQuarterlyIncomeStatements(ctx, symbol, limit)
+	if err != nil {
+		svr.log.Printf("Error fetching Income Statements from service: %s", err)
+	}
+
+	if len(mis) == 0 {
+		return &is, nil
+	}
+
+	for _, mi := range mis {
+		is.IncomeStatements = append(is.IncomeStatements, svr.GetIncomeStatement(mi))
+	}
+
+	return &is, nil
+}
+
 func (svc *Svr) GetIncomeStatement(is model.IncomeStatement) *pb.IncomeStatement {
 	i := pb.IncomeStatement{}
 	i.ReportDate = timestamppb.New(is.ReportDate)
@@ -133,6 +175,27 @@ func (svr *Svr) GetAnnualCashFlows(ctx context.Context, request *pb.GetRequest) 
 	limit := int(request.GetLimit())
 
 	mcf, err := svr.svc.GetAnnualCashFlows(ctx, symbol, limit)
+	if err != nil {
+		svr.log.Printf("Error fetching Cash Flows from service: %s", err)
+	}
+
+	if len(mcf) == 0 {
+		return &cf, nil
+	}
+
+	for _, mc := range mcf {
+		cf.CashFlows = append(cf.CashFlows, svr.GetCashFlow(mc))
+	}
+
+	return &cf, nil
+}
+
+func (svr *Svr) GetQuarterlyCashFlows(ctx context.Context, request *pb.GetRequest) (*pb.CashFlows, error) {
+	cf := pb.CashFlows{}
+	symbol := request.GetSymbol()
+	limit := int(request.GetLimit())
+
+	mcf, err := svr.svc.GetQuarterlyCashFlows(ctx, symbol, limit)
 	if err != nil {
 		svr.log.Printf("Error fetching Cash Flows from service: %s", err)
 	}

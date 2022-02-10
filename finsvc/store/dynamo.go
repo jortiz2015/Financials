@@ -37,9 +37,17 @@ func NewDynamo(log *log.Logger) (api.Store, error) {
 }
 
 func (d *Dynamo) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
+	return d.getBalanceSheets(ctx, symbol, "10-K", limit)
+}
+
+func (d *Dynamo) GetQuarterlyBalanceSheets(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
+	return d.getBalanceSheets(ctx, symbol, "10-Q", limit)
+}
+
+func (d *Dynamo) getBalanceSheets(ctx context.Context, symbol string, filing string, limit int) ([]model.BalanceSheet, error) {
 	_limit := int32(limit)
 	pkFilter := fmt.Sprintf("SYMBOL#%s", symbol)
-	skFilter := "STATEMENT#BALANCESHEET#FILING#10-K"
+	skFilter := fmt.Sprintf("STATEMENT#BALANCESHEET#FILING#%s", filing)
 
 	keyCond := expression.KeyAnd(
 		expression.Key("pk").Equal(expression.Value(pkFilter)),
@@ -112,7 +120,7 @@ func (d *Dynamo) GetAnnualBalanceSheets(ctx context.Context, symbol string, limi
 	return balanceSheets, nil
 }
 
-func (d *Dynamo) InsertAnnualBalanceSheet(ctx context.Context, symbol string, bs *model.BalanceSheet) error {
+func (d *Dynamo) InsertBalanceSheet(ctx context.Context, symbol string, bs *model.BalanceSheet) error {
 	item := d.MarshalListOfMapsBS(symbol, bs)
 	input := &dynamodb.PutItemInput{
 		Item:      item,
@@ -121,20 +129,20 @@ func (d *Dynamo) InsertAnnualBalanceSheet(ctx context.Context, symbol string, bs
 
 	_, err := d.client.PutItem(ctx, input)
 	if err != nil {
-		d.log.Fatalf("Unable to insert Annual Balance Sheet for symbol: %s, %v", symbol, err)
+		d.log.Fatalf("Unable to insert Balance Sheet for symbol: %s, %v", symbol, err)
 	}
 
 	return err
 }
 
-func (d *Dynamo) InsertAnnualBalanceSheets(ctx context.Context, symbol string, bs []model.BalanceSheet) error {
+func (d *Dynamo) InsertBalanceSheets(ctx context.Context, symbol string, bs []model.BalanceSheet) error {
 	input := &dynamodb.BatchWriteItemInput{
 		RequestItems: d.GetWriteRequestItemsBS(symbol, bs),
 	}
 
 	_, err := d.client.BatchWriteItem(ctx, input)
 	if err != nil {
-		d.log.Fatalf("Unable to insert bulk Annual Balance Sheet for symbol: %s, %v", symbol, err)
+		d.log.Fatalf("Unable to insert bulk Balance Sheet for symbol: %s, %v", symbol, err)
 	}
 
 	return nil
@@ -202,9 +210,17 @@ func (d *Dynamo) MarshalListOfMapsBS(symbol string, bs *model.BalanceSheet) map[
 }
 
 func (d *Dynamo) GetAnnualIncomeStatements(ctx context.Context, symbol string, limit int) ([]model.IncomeStatement, error) {
+	return d.getIncomeStatements(ctx, symbol, "10-K", limit)
+}
+
+func (d *Dynamo) GetQuarterlyIncomeStatements(ctx context.Context, symbol string, limit int) ([]model.IncomeStatement, error) {
+	return d.getIncomeStatements(ctx, symbol, "10-Q", limit)
+}
+
+func (d *Dynamo) getIncomeStatements(ctx context.Context, symbol string, filing string, limit int) ([]model.IncomeStatement, error) {
 	_limit := int32(limit)
 	pkFilter := fmt.Sprintf("SYMBOL#%s", symbol)
-	skFilter := "STATEMENT#INCOME#FILING#10-K"
+	skFilter := fmt.Sprintf("STATEMENT#INCOME#FILING#%s", filing)
 
 	keyCond := expression.KeyAnd(
 		expression.Key("pk").Equal(expression.Value(pkFilter)),
@@ -225,7 +241,7 @@ func (d *Dynamo) GetAnnualIncomeStatements(ctx context.Context, symbol string, l
 	})
 
 	if err != nil {
-		d.log.Fatalf("Unable to fetch Annual Income Statements for symbol: %s, %v", symbol, err)
+		d.log.Fatalf("Unable to fetch Income Statements for symbol: %s, %v", symbol, err)
 		return []model.IncomeStatement{}, err
 	}
 
@@ -261,8 +277,8 @@ func (d *Dynamo) GetAnnualIncomeStatements(ctx context.Context, symbol string, l
 	return incomeStatements, nil
 }
 
-func (d *Dynamo) InsertAnnualIncomeStatement(ctx context.Context, symbol string, is *model.IncomeStatement) error {
-	item := d.MarshalListOfMapsIS(symbol, is)
+func (d *Dynamo) InsertIncomeStatement(ctx context.Context, symbol string, is *model.IncomeStatement, filing string) error {
+	item := d.MarshalListOfMapsIS(symbol, is, filing)
 	input := &dynamodb.PutItemInput{
 		Item:      item,
 		TableName: aws.String("Financials"),
@@ -270,34 +286,34 @@ func (d *Dynamo) InsertAnnualIncomeStatement(ctx context.Context, symbol string,
 
 	_, err := d.client.PutItem(ctx, input)
 	if err != nil {
-		d.log.Fatalf("Unable to insert Annual Income Statement for symbol: %s, %v", symbol, err)
+		d.log.Fatalf("Unable to insert Income Statement for symbol: %s, %v", symbol, err)
 	}
 
 	return err
 }
 
-func (d *Dynamo) InsertAnnualIncomeStatements(ctx context.Context, symbol string, is []model.IncomeStatement) error {
+func (d *Dynamo) InsertIncomeStatements(ctx context.Context, symbol string, is []model.IncomeStatement, filing string) error {
 	input := &dynamodb.BatchWriteItemInput{
-		RequestItems: d.GetWriteRequestItemsIS(symbol, is),
+		RequestItems: d.GetWriteRequestItemsIS(symbol, is, filing),
 	}
 
 	_, err := d.client.BatchWriteItem(ctx, input)
 	if err != nil {
-		d.log.Fatalf("Unable to insert bulk Annual Balance Sheet for symbol: %s, %v", symbol, err)
+		d.log.Fatalf("Unable to insert bulk Income Statements for symbol: %s, %v", symbol, err)
 	}
 
 	return nil
 }
 
 // Function to create a map[string][]types.WriteRequest of Put Requests to insert array of model.BalanceSheet
-func (d *Dynamo) GetWriteRequestItemsIS(symbol string, is []model.IncomeStatement) map[string][]types.WriteRequest {
+func (d *Dynamo) GetWriteRequestItemsIS(symbol string, is []model.IncomeStatement, filing string) map[string][]types.WriteRequest {
 	requestItems := map[string][]types.WriteRequest{}
 	requestItems["Financials"] = []types.WriteRequest{}
 
 	for i := 0; i < len(is); i++ {
 		requestItems["Financials"] = append(requestItems["Financials"], types.WriteRequest{
 			PutRequest: &types.PutRequest{
-				Item: d.MarshalListOfMapsIS(symbol, &is[i]),
+				Item: d.MarshalListOfMapsIS(symbol, &is[i], filing),
 			},
 		})
 	}
@@ -305,10 +321,10 @@ func (d *Dynamo) GetWriteRequestItemsIS(symbol string, is []model.IncomeStatemen
 	return requestItems
 }
 
-func (d *Dynamo) MarshalListOfMapsIS(symbol string, is *model.IncomeStatement) map[string]types.AttributeValue {
+func (d *Dynamo) MarshalListOfMapsIS(symbol string, is *model.IncomeStatement, filing string) map[string]types.AttributeValue {
 	pk := fmt.Sprintf("SYMBOL#%s", symbol)
-	sk := fmt.Sprintf("STATEMENT#INCOME#FILING#10-K#FISCALDATE#%s", is.FiscalDate.Format("2006-01-02"))
-	d.log.Printf("Inserting bs into dynamo. pk: %s\tsk: %s\n", pk, sk)
+	sk := fmt.Sprintf("STATEMENT#INCOME#FILING#%s#FISCALDATE#%s", filing, is.FiscalDate.Format("2006-01-02"))
+	d.log.Printf("Inserting is into dynamo. pk: %s\tsk: %s\n", pk, sk)
 
 	item := map[string]types.AttributeValue{
 		"pk":                     &types.AttributeValueMemberS{Value: pk},
@@ -339,9 +355,17 @@ func (d *Dynamo) MarshalListOfMapsIS(symbol string, is *model.IncomeStatement) m
 // CASH FLOW FUNCTIONS
 
 func (d *Dynamo) GetAnnualCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error) {
+	return d.getCashFlows(ctx, symbol, "10-K", limit)
+}
+
+func (d *Dynamo) GetQuarterlyCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error) {
+	return d.getCashFlows(ctx, symbol, "10-Q", limit)
+}
+
+func (d *Dynamo) getCashFlows(ctx context.Context, symbol string, filing string, limit int) ([]model.CashFlow, error) {
 	_limit := int32(limit)
 	pkFilter := fmt.Sprintf("SYMBOL#%s", symbol)
-	skFilter := "STATEMENT#CASHFLOW#FILING#10-K"
+	skFilter := fmt.Sprintf("STATEMENT#CASHFLOW#FILING#%s", filing)
 
 	keyCond := expression.KeyAnd(
 		expression.Key("pk").Equal(expression.Value(pkFilter)),
@@ -398,8 +422,8 @@ func (d *Dynamo) GetAnnualCashFlows(ctx context.Context, symbol string, limit in
 	return cashFlows, nil
 }
 
-func (d *Dynamo) InsertAnnualCashFlow(ctx context.Context, symbol string, cf *model.CashFlow) error {
-	item := d.MarshalListOfMapsCF(symbol, cf)
+func (d *Dynamo) InsertCashFlow(ctx context.Context, symbol string, cf *model.CashFlow, filing string) error {
+	item := d.MarshalListOfMapsCF(symbol, cf, filing)
 	input := &dynamodb.PutItemInput{
 		Item:      item,
 		TableName: aws.String("Financials"),
@@ -413,9 +437,9 @@ func (d *Dynamo) InsertAnnualCashFlow(ctx context.Context, symbol string, cf *mo
 	return err
 }
 
-func (d *Dynamo) InsertAnnualCashFlows(ctx context.Context, symbol string, cf []model.CashFlow) error {
+func (d *Dynamo) InsertCashFlows(ctx context.Context, symbol string, cf []model.CashFlow, filing string) error {
 	input := &dynamodb.BatchWriteItemInput{
-		RequestItems: d.GetWriteRequestItemsCF(symbol, cf),
+		RequestItems: d.GetWriteRequestItemsCF(symbol, cf, filing),
 	}
 
 	_, err := d.client.BatchWriteItem(ctx, input)
@@ -427,14 +451,14 @@ func (d *Dynamo) InsertAnnualCashFlows(ctx context.Context, symbol string, cf []
 }
 
 // Function to create a map[string][]types.WriteRequest of Put Requests to insert array of model.CashFlow
-func (d *Dynamo) GetWriteRequestItemsCF(symbol string, cf []model.CashFlow) map[string][]types.WriteRequest {
+func (d *Dynamo) GetWriteRequestItemsCF(symbol string, cf []model.CashFlow, filing string) map[string][]types.WriteRequest {
 	requestItems := map[string][]types.WriteRequest{}
 	requestItems["Financials"] = []types.WriteRequest{}
 
 	for i := 0; i < len(cf); i++ {
 		requestItems["Financials"] = append(requestItems["Financials"], types.WriteRequest{
 			PutRequest: &types.PutRequest{
-				Item: d.MarshalListOfMapsCF(symbol, &cf[i]),
+				Item: d.MarshalListOfMapsCF(symbol, &cf[i], filing),
 			},
 		})
 	}
@@ -442,9 +466,9 @@ func (d *Dynamo) GetWriteRequestItemsCF(symbol string, cf []model.CashFlow) map[
 	return requestItems
 }
 
-func (d *Dynamo) MarshalListOfMapsCF(symbol string, cf *model.CashFlow) map[string]types.AttributeValue {
+func (d *Dynamo) MarshalListOfMapsCF(symbol string, cf *model.CashFlow, filing string) map[string]types.AttributeValue {
 	pk := fmt.Sprintf("SYMBOL#%s", symbol)
-	sk := fmt.Sprintf("STATEMENT#CASHFLOW#FILING#10-K#FISCALDATE#%s", cf.FiscalDate.Format("2006-01-02"))
+	sk := fmt.Sprintf("STATEMENT#CASHFLOW#FILING#%s#FISCALDATE#%s", filing, cf.FiscalDate.Format("2006-01-02"))
 	d.log.Printf("Inserting cf into dynamo. pk: %s\tsk: %s\n", pk, sk)
 
 	item := map[string]types.AttributeValue{

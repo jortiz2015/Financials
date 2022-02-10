@@ -5,10 +5,12 @@ import "google/protobuf/timestamp.proto";
 option go_package = "fin";
 
 service FinSvc {
-    //rpc GetAnnualBalanceSheet(Symbol) returns (BalanceSheet);
     rpc GetAnnualBalanceSheets(GetRequest) returns (BalanceSheets);
+    rpc GetQuarterlyBalanceSheets(GetRequest) returns (BalanceSheets);
     rpc GetAnnualIncomeStatements(GetRequest) returns (IncomeStatements);
+    rpc GetQuarterlyIncomeStatements(GetRequest) returns (IncomeStatements);
     rpc GetAnnualCashFlows(GetRequest) returns (CashFlows);
+    rpc GetQuarterlyCashFlows(GetRequest) returns (CashFlows);
 }
 
 message GetRequest {

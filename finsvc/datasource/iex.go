@@ -70,6 +70,55 @@ func (i *IEX) GetAnnualBalanceSheets(ctx context.Context, symbol string, limit i
 	return balanceSheets, nil
 }
 
+func (i *IEX) GetQuarterlyBalanceSheets(ctx context.Context, symbol string, limit int) ([]model.BalanceSheet, error) {
+	response, err := i.client.QuarterlyBalanceSheets(context.Background(), symbol, limit)
+	if err != nil {
+		log.Fatalf("Error getting balance sheets: %s", err)
+	}
+	bss := response.Statements
+	i.log.Printf("IEX RESPONSE: %+v\tERROR: %+v", response, err)
+	balanceSheets := []model.BalanceSheet{}
+
+	for _, b := range bss {
+		bs := model.BalanceSheet{}
+		bs.ReportDate = time.Time(b.ReportDate)
+		bs.FilingType = b.FilingType
+		bs.FiscalDate = time.Time(b.FiscalDate)
+		bs.FiscalQuarter = b.FiscalQuarter
+		bs.FiscalYear = b.FiscalYear
+		bs.Currency = b.Currency
+		bs.CurrentCash = b.CurrentCash
+		bs.ShortTermInvestments = b.ShortTermInvestments
+		bs.Receivables = b.Receivables
+		bs.Inventory = b.Inventory
+		bs.OtherCurrentAssets = b.OtherCurrentAssets
+		bs.CurrentAssets = b.CurrentAssets
+		bs.LongTermInvestments = b.LongTermInvestments
+		bs.PropertyPlantEquipment = b.PropertyPlantEquipment
+		bs.Goodwill = b.Goodwill
+		bs.IntangibleAssets = b.IntangibleAssets
+		bs.OtherAssets = b.OtherAssets
+		bs.TotalAssets = b.TotalAssets
+		bs.AccountsPayable = b.AccountsPayable
+		bs.CurrentLongTermDebt = b.CurrentLongTermDebt
+		bs.OtherCurrentLiabilities = b.OtherCurrentLiabilities
+		bs.TotalCurrentLiabilities = b.TotalCurrentLiabilities
+		bs.LongTermDebt = b.LongTermDebt
+		bs.OtherLiabilities = b.OtherLiablities
+		bs.MinorityInterest = b.MinorityInterest
+		bs.TotalLiabilities = b.TotalLiabilities
+		bs.CommonStock = b.CommonStock
+		bs.RetainedEarnings = b.RetainedEarnings
+		bs.TreasuryStock = b.TreasuryStock
+		bs.CapitalSurplus = b.CapitalSurplus
+		bs.ShareholderEquity = b.ShareholderEquity
+		bs.NetTangibleAssets = b.NetTangibleAssets
+		balanceSheets = append(balanceSheets, bs)
+	}
+
+	return balanceSheets, nil
+}
+
 func (i *IEX) GetAnnualIncomeStatements(ctx context.Context, symbol string, limit int) ([]model.IncomeStatement, error) {
 	client := iex.NewClient(os.Getenv("IEX_KEY"), iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
 	response, err := client.AnnualIncomeStatements(context.Background(), symbol, limit)
@@ -108,9 +157,83 @@ func (i *IEX) GetAnnualIncomeStatements(ctx context.Context, symbol string, limi
 	return incomeStatements, nil
 }
 
+func (i *IEX) GetQuarterlyIncomeStatements(ctx context.Context, symbol string, limit int) ([]model.IncomeStatement, error) {
+	client := iex.NewClient(os.Getenv("IEX_KEY"), iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
+	response, err := client.QuarterlyIncomeStatements(context.Background(), symbol, limit)
+	if err != nil {
+		log.Fatalf("Error getting Income Statements: %s", err)
+	}
+
+	i.log.Printf("RESPONSE: %+v\tERROR: %+v", response, err)
+
+	iss := response.Statements
+	incomeStatements := []model.IncomeStatement{}
+
+	for _, i := range iss {
+		is := model.IncomeStatement{}
+		is.ReportDate = time.Time(i.ReportDate)
+		is.FiscalDate = time.Time(i.FiscalDate)
+		is.Currency = i.Currency
+		is.TotalRevenue = i.TotalRevenue
+		is.CostOfRevenue = i.CostOfRevenue
+		is.GrossProfit = i.GrossProfit
+		is.ResearchAndDevelopment = i.ResearchAndDevelopment
+		is.SellingGeneralAndAdmin = i.SellingGeneralAndAdmin
+		is.OperatingExpense = i.OperatingExpense
+		is.OperatingIncome = i.OperatingIncome
+		is.OtherIncomeExpenseNet = i.OtherIncomeExpenseNet
+		is.EBIT = i.EBIT
+		is.InterestIncome = i.InterestIncome
+		is.PretaxIncome = i.PretaxIncome
+		is.IncomeTax = i.IncomeTax
+		is.MinorityInterest = i.MinorityInterest
+		is.NetIncome = i.NetIncome
+		is.NetIncomeBasic = i.NetIncomeBasic
+		incomeStatements = append(incomeStatements, is)
+	}
+
+	return incomeStatements, nil
+}
+
 func (i *IEX) GetAnnualCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error) {
 	client := iex.NewClient(os.Getenv("IEX_KEY"), iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
 	response, err := client.AnnualCashFlows(context.Background(), symbol, limit)
+	if err != nil {
+		log.Fatalf("Error getting Cash Flows: %s", err)
+	}
+
+	cfs := response.Statements
+	cashFlows := []model.CashFlow{}
+
+	for _, i := range cfs {
+		cf := model.CashFlow{}
+		cf.ReportDate = time.Time(i.ReportDate)
+		cf.FiscalDate = time.Time(i.FiscalDate)
+		cf.Currency = i.Currency
+		cf.NetIncome = i.NetIncome
+		cf.Depreciation = i.Depreciation
+		cf.ChangesInReceivables = i.ChangesInReceivables
+		cf.ChangesInInventories = i.ChangesInInventories
+		cf.CashChange = i.CashChange
+		cf.CashFlow = i.CashFlow
+		cf.CapitalExpenditures = i.CapitalExpenditures
+		cf.Investments = i.Investments
+		cf.InvestingActivityOther = i.InvestingActivityOther
+		cf.TotalInvestingCashFlows = i.TotalInvestingCashFlows
+		cf.DividendsPaid = i.DividendsPaid
+		cf.NetBorrowings = i.NetBorrowings
+		cf.OtherFinancingCashFlows = i.OtherFinancingCashFlows
+		cf.CashFlowFinancing = i.CashFlowFinancing
+		cf.ExchangeRateEffect = i.ExchangeRateEffect
+		cashFlows = append(cashFlows, cf)
+	}
+
+	return cashFlows, nil
+}
+
+func (i *IEX) GetQuarterlyCashFlows(ctx context.Context, symbol string, limit int) ([]model.CashFlow, error) {
+	client := iex.NewClient(os.Getenv("IEX_KEY"), iex.WithBaseURL("https://sandbox.iexapis.com/stable"))
+	response, err := client.QuarterlyCashFlows(context.Background(), symbol, limit)
 	if err != nil {
 		log.Fatalf("Error getting Cash Flows: %s", err)
 	}
