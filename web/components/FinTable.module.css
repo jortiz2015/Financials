@@ -4,6 +4,14 @@
 
 .table {
 	display: table;
+	color: white;
+	width: 100%;
+	border-collapse: collapse;
+	overflow-x: scroll;
+}
+
+.table tr, .table th {
+	border: .25px solid rgba(92,92,92,255);
 }
 
 .table tr {
@@ -16,8 +24,14 @@
 
 .labels td {
 	font-weight: 600;
+	background-color: rgba(35,35,35,255)!important;
 }
 
 .years {
 	font-weight: 600;
+	background-color: rgba(35,35,35,255)!important;
+}
+
+.data td {
+	text-align: right;
 }

@@ -2,14 +2,14 @@ import { Timestamp } from "google-protobuf/google/protobuf/timestamp_pb";
 import React from "react";
 import style from "./FinTable.module.css";
 
-import { BalanceSheet, BalanceSheets } from "../pages/finsvc_pb";
+import { BalanceSheet } from "../pages/finsvc_pb";
 
-const FinTable: React.FC<{f: BalanceSheet[] | null}> = (props) => {
+const BSTab: React.FC<{f: BalanceSheet[] | null}> = (props) => {
     return (
         <>
         <table className={style.table}>
             <tbody>
-                <tr>
+                <tr className={style.labels}>
                     <td className={style.years}>Fiscal Year</td>
                     <td>Reported Date</td>
                     <td>Filing Type</td>
@@ -52,7 +52,7 @@ const FinTable: React.FC<{f: BalanceSheet[] | null}> = (props) => {
                 let fiscalDate = fiscalDateTS.toDate().toISOString().split("T")[0];
 
                 return (
-                <tr key={bs.getFiscalyear()}>
+                <tr key={bs.getFiscalyear()} className={style.data}>
                     <td className={style.years}>{bs.getFiscalyear()}</td>
                     <td>{reportDate}</td>
                     <td>{bs.getFilingtype()}</td>
@@ -96,4 +96,4 @@ const FinTable: React.FC<{f: BalanceSheet[] | null}> = (props) => {
     );
 };
 
-export default FinTable;
+export default BSTab;
